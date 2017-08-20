@@ -12389,14 +12389,15 @@ div#notebook {
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>array([{&#39;religion&#39;: &#39;muslim&#39;}, {&#39;religion&#39;: &#39;muslim&#39;},
-       {&#39;religion&#39;: &#39;muslim&#39;},
-       {&#39;religion&#39;: &#39;muslim&#39;, &#39;amenity&#39;: &#39;place_of_worship&#39;},
-       {&#39;building&#39;: &#39;yes&#39;, &#39;religion&#39;: &#39;muslim&#39;, &#39;amenity&#39;: &#39;place_of_worship&#39;},
+<pre>array([{&#39;religion&#39;: &#39;muslim&#39;},
        {&#39;building&#39;: &#39;yes&#39;, &#39;religion&#39;: &#39;muslim&#39;, &#39;amenity&#39;: &#39;place_of_worship&#39;},
        {&#39;religion&#39;: &#39;muslim&#39;},
        {&#39;building&#39;: &#39;yes&#39;, &#39;religion&#39;: &#39;muslim&#39;, &#39;amenity&#39;: &#39;place_of_worship&#39;},
-       {&#39;religion&#39;: &#39;muslim&#39;}, {&#39;religion&#39;: &#39;muslim&#39;}], dtype=object)</pre>
+       {&#39;religion&#39;: &#39;muslim&#39;}, {&#39;religion&#39;: &#39;muslim&#39;},
+       {&#39;religion&#39;: &#39;muslim&#39;},
+       {&#39;building&#39;: &#39;yes&#39;, &#39;religion&#39;: &#39;muslim&#39;, &#39;amenity&#39;: &#39;place_of_worship&#39;},
+       {&#39;religion&#39;: &#39;muslim&#39;},
+       {&#39;building&#39;: &#39;yes&#39;, &#39;religion&#39;: &#39;muslim&#39;, &#39;amenity&#39;: &#39;place_of_worship&#39;}], dtype=object)</pre>
 </div>
 
 </div>
@@ -12509,7 +12510,7 @@ div#notebook {
 <div class="text_cell_render border-box-sizing rendered_html">
 <h2 id="New-Problems">New Problems<a class="anchor-link" href="#New-Problems">&#182;</a></h2><ul>
 <li>It seems some have names only in English. I will add these entries with their English names. </li>
-<li>Apart from this, most of places seem to be holding no information but the religion tag itself. Since, we have no chance of making guesses about this I will simply ignore these entries. </li>
+<li>Apart from this, most of places seem to be holding no information but the religion tag itself. Since, we have no chance of making guesses about these I will simply ignore these entries. </li>
 <li>Lastly, there are some entries with some variables that could help to extract their types.</li>
 </ul>
 
@@ -12544,7 +12545,7 @@ div#notebook {
 <div class="prompt input_prompt">In&nbsp;[20]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython2"><pre><span></span><span class="n">tabulate_dict</span><span class="p">(</span><span class="n">getProminentAttributes</span><span class="p">(</span><span class="n">muslim_place_list</span><span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">]))</span>
+<div class=" highlight hl-ipython2"><pre><span></span><span class="n">tabulate_dict</span><span class="p">(</span><span class="n">getProminentAttributes</span><span class="p">(</span><span class="n">muslim_place_list</span><span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">]))</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
 </pre></div>
 
 </div>
@@ -12576,116 +12577,94 @@ div#notebook {
   <thead>
     <tr style="text-align: right;">
       <th></th>
-      <th>building</th>
-      <th>source</th>
-      <th>amenity</th>
-      <th>name:en</th>
+      <th>0</th>
+      <th>1</th>
+      <th>2</th>
+      <th>3</th>
+      <th>4</th>
+      <th>5</th>
+      <th>6</th>
+      <th>7</th>
+      <th>8</th>
+      <th>9</th>
+      <th>10</th>
+      <th>11</th>
+      <th>12</th>
+      <th>13</th>
+      <th>14</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <th>0</th>
+      <th>building</th>
       <td>y</td>
-      <td>a</td>
-      <td>a</td>
-      <td>a</td>
-    </tr>
-    <tr>
-      <th>1</th>
       <td>mosque</td>
-      <td>bing</td>
-      <td>place_of_worship</td>
-      <td></td>
-    </tr>
-    <tr>
-      <th>2</th>
       <td>s</td>
-      <td>h</td>
-      <td>c</td>
-      <td>C</td>
-    </tr>
-    <tr>
-      <th>3</th>
       <td>e</td>
-      <td>local_knowledge; Bing</td>
-      <td>e</td>
-      <td>e</td>
-    </tr>
-    <tr>
-      <th>4</th>
       <td>yes</td>
-      <td>Yahoo</td>
-      <td>f</td>
-      <td>Murat Reia Camii</td>
+      <td>None</td>
+      <td>None</td>
+      <td>None</td>
+      <td>None</td>
+      <td>None</td>
+      <td>None</td>
+      <td>None</td>
+      <td>None</td>
+      <td>None</td>
+      <td>None</td>
     </tr>
     <tr>
-      <th>5</th>
-      <td>None</td>
-      <td>o</td>
-      <td>i</td>
-      <td>i</td>
-    </tr>
-    <tr>
-      <th>6</th>
-      <td>None</td>
-      <td>Y</td>
+      <th>source</th>
+      <td>a</td>
+      <td>bing</td>
       <td>h</td>
-      <td>m</td>
-    </tr>
-    <tr>
-      <th>7</th>
-      <td>None</td>
-      <td>Bing</td>
-      <td>l</td>
-      <td>M</td>
-    </tr>
-    <tr>
-      <th>8</th>
-      <td>None</td>
-      <td>None</td>
+      <td>local_knowledge; Bing</td>
+      <td>Yahoo</td>
       <td>o</td>
-      <td>s</td>
+      <td>Y</td>
+      <td>Bing</td>
+      <td>None</td>
+      <td>None</td>
+      <td>None</td>
+      <td>None</td>
+      <td>None</td>
+      <td>None</td>
+      <td>None</td>
     </tr>
     <tr>
-      <th>9</th>
-      <td>None</td>
-      <td>None</td>
+      <th>amenity</th>
+      <td>a</td>
+      <td>place_of_worship</td>
+      <td>c</td>
+      <td>e</td>
+      <td>f</td>
+      <td>i</td>
+      <td>h</td>
+      <td>l</td>
+      <td>o</td>
       <td>p</td>
-      <td>r</td>
-    </tr>
-    <tr>
-      <th>10</th>
-      <td>None</td>
-      <td>None</td>
       <td>s</td>
-      <td>u</td>
-    </tr>
-    <tr>
-      <th>11</th>
-      <td>None</td>
-      <td>None</td>
       <td>r</td>
-      <td>t</td>
-    </tr>
-    <tr>
-      <th>12</th>
-      <td>None</td>
-      <td>None</td>
       <td>w</td>
-      <td>R</td>
-    </tr>
-    <tr>
-      <th>13</th>
-      <td>None</td>
-      <td>None</td>
       <td>grave_yard</td>
-      <td>None</td>
+      <td>_</td>
     </tr>
     <tr>
-      <th>14</th>
+      <th>name:en</th>
+      <td>a</td>
+      <td></td>
+      <td>C</td>
+      <td>e</td>
+      <td>Murat Reia Camii</td>
+      <td>i</td>
+      <td>m</td>
+      <td>M</td>
+      <td>s</td>
+      <td>r</td>
+      <td>u</td>
+      <td>t</td>
+      <td>R</td>
       <td>None</td>
-      <td>None</td>
-      <td>_</td>
       <td>None</td>
     </tr>
   </tbody>
@@ -13540,7 +13519,7 @@ div#notebook {
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>&lt;sqlite3.Cursor at 0x5d314ab0&gt;</pre>
+<pre>&lt;sqlite3.Cursor at 0xa7bd69d0&gt;</pre>
 </div>
 
 </div>
@@ -13835,7 +13814,7 @@ div#notebook {
 
 <div class="output_area"><div class="prompt"></div>
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>1122 out of 1217 places will have NA values in database.
+<pre>1122 out of 1217 places will have NULL values in database.
 </pre>
 </div>
 </div>

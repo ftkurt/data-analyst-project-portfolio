@@ -356,14 +356,15 @@ np.random.choice(muslim_place_list[""],10)
 
 
 
-    array([{'religion': 'muslim'}, {'religion': 'muslim'},
-           {'religion': 'muslim'},
-           {'religion': 'muslim', 'amenity': 'place_of_worship'},
-           {'building': 'yes', 'religion': 'muslim', 'amenity': 'place_of_worship'},
+    array([{'religion': 'muslim'},
            {'building': 'yes', 'religion': 'muslim', 'amenity': 'place_of_worship'},
            {'religion': 'muslim'},
            {'building': 'yes', 'religion': 'muslim', 'amenity': 'place_of_worship'},
-           {'religion': 'muslim'}, {'religion': 'muslim'}], dtype=object)
+           {'religion': 'muslim'}, {'religion': 'muslim'},
+           {'religion': 'muslim'},
+           {'building': 'yes', 'religion': 'muslim', 'amenity': 'place_of_worship'},
+           {'religion': 'muslim'},
+           {'building': 'yes', 'religion': 'muslim', 'amenity': 'place_of_worship'}], dtype=object)
 
 
 
@@ -450,7 +451,7 @@ tabulate_dict(muslim_types)
 
 ## New Problems
 * It seems some have names only in English. I will add these entries with their English names. 
-* Apart from this, most of places seem to be holding no information but the religion tag itself. Since, we have no chance of making guesses about this I will simply ignore these entries. 
+* Apart from this, most of places seem to be holding no information but the religion tag itself. Since, we have no chance of making guesses about these I will simply ignore these entries. 
 * Lastly, there are some entries with some variables that could help to extract their types.
 
 
@@ -470,7 +471,7 @@ def getProminentAttributes(list_):
 
 
 ```python
-tabulate_dict(getProminentAttributes(muslim_place_list[""]))
+tabulate_dict(getProminentAttributes(muslim_place_list[""])).transpose()
 ```
 
 
@@ -494,116 +495,94 @@ tabulate_dict(getProminentAttributes(muslim_place_list[""]))
   <thead>
     <tr style="text-align: right;">
       <th></th>
-      <th>building</th>
-      <th>source</th>
-      <th>amenity</th>
-      <th>name:en</th>
+      <th>0</th>
+      <th>1</th>
+      <th>2</th>
+      <th>3</th>
+      <th>4</th>
+      <th>5</th>
+      <th>6</th>
+      <th>7</th>
+      <th>8</th>
+      <th>9</th>
+      <th>10</th>
+      <th>11</th>
+      <th>12</th>
+      <th>13</th>
+      <th>14</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <th>0</th>
+      <th>building</th>
       <td>y</td>
-      <td>a</td>
-      <td>a</td>
-      <td>a</td>
-    </tr>
-    <tr>
-      <th>1</th>
       <td>mosque</td>
-      <td>bing</td>
-      <td>place_of_worship</td>
-      <td></td>
-    </tr>
-    <tr>
-      <th>2</th>
       <td>s</td>
-      <td>h</td>
-      <td>c</td>
-      <td>C</td>
-    </tr>
-    <tr>
-      <th>3</th>
       <td>e</td>
-      <td>local_knowledge; Bing</td>
-      <td>e</td>
-      <td>e</td>
-    </tr>
-    <tr>
-      <th>4</th>
       <td>yes</td>
-      <td>Yahoo</td>
-      <td>f</td>
-      <td>Murat Reia Camii</td>
+      <td>None</td>
+      <td>None</td>
+      <td>None</td>
+      <td>None</td>
+      <td>None</td>
+      <td>None</td>
+      <td>None</td>
+      <td>None</td>
+      <td>None</td>
+      <td>None</td>
     </tr>
     <tr>
-      <th>5</th>
-      <td>None</td>
-      <td>o</td>
-      <td>i</td>
-      <td>i</td>
-    </tr>
-    <tr>
-      <th>6</th>
-      <td>None</td>
-      <td>Y</td>
+      <th>source</th>
+      <td>a</td>
+      <td>bing</td>
       <td>h</td>
-      <td>m</td>
-    </tr>
-    <tr>
-      <th>7</th>
-      <td>None</td>
-      <td>Bing</td>
-      <td>l</td>
-      <td>M</td>
-    </tr>
-    <tr>
-      <th>8</th>
-      <td>None</td>
-      <td>None</td>
+      <td>local_knowledge; Bing</td>
+      <td>Yahoo</td>
       <td>o</td>
-      <td>s</td>
+      <td>Y</td>
+      <td>Bing</td>
+      <td>None</td>
+      <td>None</td>
+      <td>None</td>
+      <td>None</td>
+      <td>None</td>
+      <td>None</td>
+      <td>None</td>
     </tr>
     <tr>
-      <th>9</th>
-      <td>None</td>
-      <td>None</td>
+      <th>amenity</th>
+      <td>a</td>
+      <td>place_of_worship</td>
+      <td>c</td>
+      <td>e</td>
+      <td>f</td>
+      <td>i</td>
+      <td>h</td>
+      <td>l</td>
+      <td>o</td>
       <td>p</td>
-      <td>r</td>
-    </tr>
-    <tr>
-      <th>10</th>
-      <td>None</td>
-      <td>None</td>
       <td>s</td>
-      <td>u</td>
-    </tr>
-    <tr>
-      <th>11</th>
-      <td>None</td>
-      <td>None</td>
       <td>r</td>
-      <td>t</td>
-    </tr>
-    <tr>
-      <th>12</th>
-      <td>None</td>
-      <td>None</td>
       <td>w</td>
-      <td>R</td>
-    </tr>
-    <tr>
-      <th>13</th>
-      <td>None</td>
-      <td>None</td>
       <td>grave_yard</td>
-      <td>None</td>
+      <td>_</td>
     </tr>
     <tr>
-      <th>14</th>
+      <th>name:en</th>
+      <td>a</td>
+      <td></td>
+      <td>C</td>
+      <td>e</td>
+      <td>Murat Reia Camii</td>
+      <td>i</td>
+      <td>m</td>
+      <td>M</td>
+      <td>s</td>
+      <td>r</td>
+      <td>u</td>
+      <td>t</td>
+      <td>R</td>
       <td>None</td>
-      <td>None</td>
-      <td>_</td>
       <td>None</td>
     </tr>
   </tbody>
@@ -1148,7 +1127,7 @@ c.execute('CREATE TABLE {tn} ({columns})'\
 
 
 
-    <sqlite3.Cursor at 0x5d314ab0>
+    <sqlite3.Cursor at 0xa7bd69d0>
 
 
 
@@ -1329,7 +1308,7 @@ missing = check_data_integrity(religious_places)
 print str(len(missing))+" out of "+str(len(religious_places))+" places will have NULL values in database."
 ```
 
-    1122 out of 1217 places will have NA values in database.
+    1122 out of 1217 places will have NULL values in database.
     
 
 **Function below will process all results and insert them into SQL table.**
