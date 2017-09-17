@@ -19,6 +19,7 @@ library(ggplot2)
 library(repr) # resize plot
 library(gridExtra) # grid for plots
 library(GGally) # ggpairs - multivariate summary
+library(plyr) # numeric ops
 ```
 
 ```{r echo=FALSE, Load_the_Data, warning=FALSE}
@@ -73,209 +74,159 @@ Our data set consists of 4898 entries each with 12 variables / columns.
 
 ```{r echo=FALSE, Univariate_Plots2, warning=FALSE}
 options(repr.plot.width=8, repr.plot.height=3)
-g1 <- ggplot(aes(x=quality), data=ww) + geom_histogram(binwidth=1, bins=10)
-g2 <- ggplot(aes(x=quality), data=ww) + geom_histogram(binwidth=1, bins=10)+ scale_y_log10()
+g1 <- ggplot(aes(x=quality), data=ww) + 
+  geom_histogram(binwidth=1, bins=10)
+g2 <- ggplot(aes(x=quality), data=ww) + 
+  geom_histogram(binwidth=1, bins=10) + 
+  scale_y_log10()
 grid.arrange(g1,g2,ncol=2)
 ```
 
 > Graphs above show that with majority being around quality 5-7, only few wines are of quality 9 or 3. Second graph shows distribution in a vertical logarithmic scale.
 
-Let's all also look into distribution of other variables with respect to quality. 
+> In this project we will be focusing on interaction of different variables in addition to the quality factor. However our quality factor consists of too many classes from 3 to 9. In a move to simplify this factor, I want to map qualities into 3 distinct qualities classes:
+> 1. Lesser: Qualities 3, 4, 5
+> 2. Average: Quality 6
+> 3. Higher: Qualities: 7, 8, 9
 
-```{r echo=FALSE, Univariate_Plots3, warning=FALSE}
-g1 <- ggplot(aes(x=fixed.acidity,fill=factor(quality)), data=ww) + geom_histogram(bins=30) + 
-    scale_fill_brewer(palette="Spectral") +
-    labs(fill="quality")
-g2 <- ggplot(aes(x=fixed.acidity,fill=factor(quality)), data=subset(ww,
-        fixed.acidity<quantile(ww$fixed.acidity,0.99) & 
-            fixed.acidity>quantile(ww$fixed.acidity,0.01))) + 
-    geom_histogram(bins=20) + scale_fill_brewer(palette="Spectral") + 
-    labs(x = "fixed.acidity (0.01<Q<0.99)", fill="quality")
-grid.arrange(g1,g2,ncol=2)
+```{r echo=FALSE, Multivariate_Plots1e, warning=FALSE}
+ww$quality.class <- mapvalues(ww$quality, from = c(3,4,5,6,7,8,9), to = c("lesser","lesser","lesser","average","higher","higher","higher"))
+
 ```
 
-> Distribution is normal. There seems to be no substantial difference in distribution of different qualities.
+Let's all also look into distribution of other variables with respect to quality. 
+
+
+```{r echo=FALSE, Univariate_Plots3a, warning=FALSE}
+univariate.plot <- function(df,vr,lower.quantile,upper.quantile,bins) 
+{
+  col_o <- df[,vr]
+  grid.arrange(
+    ggplot(df, aes( x = 1, y = col_o)) + 
+      geom_jitter(alpha = 0.1 ) +
+      labs(y=vr) +
+      geom_boxplot(alpha = 0.2, color = 'red' ),
+    ggplot(df, aes(x = col_o)) + 
+      labs(x=vr) +
+      geom_histogram(bins=bins ),ncol=2)
+  
+  data_s <- subset(df,
+    col_o<quantile(col_o,upper.quantile) & 
+    col_o>quantile(col_o,lower.quantile))
+  col_f <- data_s[,vr]
+  ggplot(aes(x=col_f), data = data_s) + 
+    geom_histogram(bins=bins) + 
+    labs(x = paste(vr," (",c(lower.quantile),"< Quantile <",c(upper.quantile),")"))
+}
+```
+
+
+```{r echo=FALSE, Univariate_Plots3b, warning=FALSE}
+univariate.plot(ww,"fixed.acidity",0.01,0.99,20)
+```
+
+> Distribution is normal. There are few outliers, some with too high values. To display histogram in a better way, I filtered outlier values by applying a quantile filter between 0.01 - 0.99.
 
 Below are summary of the variable **fixed.acidity**.
 
 ```{r echo=FALSE, Univariate_Plots4, warning=FALSE}
 summary(ww$fixed.acidity)
 
-g1 <- ggplot(aes(x=volatile.acidity,fill=factor(quality)), data=ww) + geom_histogram(bins=30) + 
-    scale_fill_brewer(palette="Spectral") +
-    labs(fill="quality")
-g2 <- ggplot(aes(x=volatile.acidity,fill=factor(quality)), data=subset(ww,
-        volatile.acidity<quantile(ww$volatile.acidity,0.99) & 
-            volatile.acidity>quantile(ww$volatile.acidity,0.01))) + 
-    geom_histogram(bins=20) + scale_fill_brewer(palette="Spectral") + 
-    labs(x = "volatile.acidity (0.01<Q<0.99)", fill="quality")
-grid.arrange(g1,g2,ncol=2)
+univariate.plot(ww,"volatile.acidity",0.01,0.99,20)
 ```
 
-> Distribution is normal with a little skewness towards right. There seems to be a hint to a difference in distribution of different qualities. Higher quality wines might have lower acidity.  We will look into **volatile.acidity** to see if it effects the quality.
+> Distribution is normal with a little skewness towards right. We will look into **volatile.acidity** to see if it effects the quality.There are quite many outliers, which could also be dues to variable being skew towards right. Many of outliers seems to be in reasonable range. To display histogram in a better way, I filtered outlier values by applying a quantile filter between 0.01 - 0.99.
 
 Below are summary of the variable **volatile.acidity**.
 
 ```{r echo=FALSE, Univariate_Plots5, warning=FALSE}
 summary(ww$volatile.acidity)
 
-g1 <- ggplot(aes(x=citric.acid,fill=factor(quality)), data=ww) + geom_histogram(bins=30) + 
-    scale_fill_brewer(palette="Spectral") +
-    labs(fill="quality")
-g2 <- ggplot(aes(x=citric.acid,fill=factor(quality)), data=subset(ww,
-        citric.acid<quantile(ww$citric.acid,0.99) & 
-            citric.acid>quantile(ww$citric.acid,0.01))) + 
-    geom_histogram(bins=20) + scale_fill_brewer(palette="Spectral") + 
-    labs(x = "citric.acid (0.01<Q<0.99)", fill="quality")
-grid.arrange(g1,g2,ncol=2)
+univariate.plot(ww,"citric.acid",0.01,0.99,35)
 ```
 
-> Distribution is normal. There seems to be no substantial difference in distribution of different qualities.
+> Distribution is normal. There are few outliers, some with too high values. To display histogram in a better way, I filtered outlier values by applying a quantile filter between 0.01 - 0.99. However, there seems to be a bounce around 0.5. This could be due to acidity being reported with rounded values.
 
 Below are summary of the variable **citric.acid**.
 
 ```{r echo=FALSE, Univariate_Plots6, warning=FALSE}
 summary(ww$citric.acid)
 
-g1 <- ggplot(aes(x=residual.sugar,fill=factor(quality)), data=ww) + geom_histogram(bins=30) + 
-    scale_fill_brewer(palette="Spectral") +
-    labs(fill="quality")
-g2 <- ggplot(aes(x=residual.sugar,fill=factor(quality)), data=subset(ww,
-        residual.sugar<quantile(ww$residual.sugar,0.99) & 
-            residual.sugar>quantile(ww$residual.sugar,0.0))) + 
-    geom_histogram(bins=35) + scale_fill_brewer(palette="Spectral") +
-    scale_x_log10() +
-    labs(x = "residual.sugar (0<Q<0.99)", fill="quality")
-grid.arrange(g1,g2,ncol=2)
+univariate.plot(ww,"residual.sugar",0,1,35) +
+  scale_x_log10()
 ```
 
-> Distribution is skew towards right. But when plotted in logarithmic scale the distribution seems to be bimodal. However, there seems to be no substantial difference in distribution of different qualities.
+> Distribution is skew towards right. But when plotted in logarithmic scale the distribution seems to be bimodal. There are very few outliers, some with too high values. I already plotted histogram in logarithmic x scale, so I didn't need to apply further quantile filtering. I used a quantile filter between 0 - 1, which will retain all values without filtering.
 
 Below are summary of the variable **residual.sugar**.
 
 ```{r echo=FALSE, Univariate_Plots7, warning=FALSE}
 summary(ww$residual.sugar)
 
-g1 <- ggplot(aes(x=chlorides,fill=factor(quality)), data=ww) + geom_histogram(bins=30) + 
-    scale_fill_brewer(palette="Spectral") +
-    labs(fill="quality")
-g2 <- ggplot(aes(x=chlorides,fill=factor(quality)), data=subset(ww,
-        chlorides<quantile(ww$chlorides,0.95) & 
-            chlorides>quantile(ww$chlorides,0.01))) + 
-    geom_histogram(bins=20) + scale_fill_brewer(palette="Spectral") + 
-    labs(x = "chlorides (0.01<Q<0.95)", fill="quality")
-grid.arrange(g1,g2,ncol=2)
+univariate.plot(ww,"chlorides",0.01,0.95,20)
 ```
 
-> Distribution is normal. There seems to be a difference in distribution of different qualities. Higher quality wines might have lower levels of chlorides.  We will look into **chlorides** to see if it effects the quality.
+> Distribution is normal. There are many outliers. The outliers seem to be forming a uniform distribution between 0.1 - 0.2. To display histogram in a better way, I filtered outlier values by applying a quantile filter between 0.01 - 0.95. The upper quantile is quite lower than the earlier plots due to this uniform region between 0.1 - 0.2.
 
 Below are summary of the variable **chlorides**.
 
 ```{r echo=FALSE, Univariate_Plots8, warning=FALSE}
 summary(ww$chlorides)
 
-g1 <- ggplot(aes(x=free.sulfur.dioxide,fill=factor(quality)), data=ww) + geom_histogram(bins=30) + 
-    scale_fill_brewer(palette="Spectral") +
-    labs(fill="quality")
-g2 <- ggplot(aes(x=free.sulfur.dioxide,fill=factor(quality)), data=subset(ww,
-        free.sulfur.dioxide<quantile(ww$free.sulfur.dioxide,0.99) & 
-            free.sulfur.dioxide>quantile(ww$free.sulfur.dioxide,0.01))) + 
-    geom_histogram(bins=20) + scale_fill_brewer(palette="Spectral") + 
-    labs(x = "free.sulfur.dioxide (0.01<Q<0.99)", fill="quality")
-grid.arrange(g1,g2,ncol=2)
+univariate.plot(ww,"free.sulfur.dioxide",0.01,0.99,25)
 ```
 
-> Distribution is normal. There seems to be no substantial difference in distribution of different qualities.
+> Distribution is normal. There are few outliers, some with too high values. To display histogram in a better way, I filtered outlier values by applying a quantile filter between 0.01 - 0.99.
 
 Below are summary of the variable **free.sulfur.dioxide**.
 
 ```{r echo=FALSE, Univariate_Plots9, warning=FALSE}
 summary(ww$free.sulfur.dioxide)
 
-g1 <- ggplot(aes(x=total.sulfur.dioxide,fill=factor(quality)), data=ww) + geom_histogram(bins=30) + 
-    scale_fill_brewer(palette="Spectral") +
-    labs(fill="quality")
-g2 <- ggplot(aes(x=total.sulfur.dioxide,fill=factor(quality)), data=subset(ww,
-        total.sulfur.dioxide<quantile(ww$total.sulfur.dioxide,0.99) & 
-            total.sulfur.dioxide>quantile(ww$total.sulfur.dioxide,0.01))) + 
-    geom_histogram(bins=20) + scale_fill_brewer(palette="Spectral") + 
-    labs(x = "total.sulfur.dioxide (0.01<Q<0.99)", fill="quality")
-grid.arrange(g1,g2,ncol=2)
+univariate.plot(ww,"total.sulfur.dioxide",0.01,0.99,25)
 ```
 
-> Distribution is normal. There seems to be a difference in distribution of different qualities. Higher quality wines might have lower levels of total.sulfur.dioxide.  We will look into **total.sulfur.dioxide** to see if it effects the quality.
+> Distribution is normal. There are few outliers. To display histogram in a better way, I filtered outlier values by applying a quantile filter between 0.01 - 0.99.
 
 Below are summary of the variable **total.sulfur.dioxide**.
 
 ```{r echo=FALSE, Univariate_Plots10, warning=FALSE}
 summary(ww$total.sulfur.dioxide)
 
-g1 <- ggplot(aes(x=density,fill=factor(quality)), data=ww) + geom_histogram(bins=30) + 
-    scale_fill_brewer(palette="Spectral") +
-    labs(fill="quality")
-g2 <- ggplot(aes(x=density,fill=factor(quality)), data=subset(ww,
-        density<quantile(ww$density,0.99) & 
-            density>quantile(ww$density,0.01))) + 
-    geom_histogram(bins=30) + scale_fill_brewer(palette="Spectral") + 
-    labs(x = "density (0.01<Q<0.99)", fill="quality")
-grid.arrange(g1,g2,ncol=2)
+univariate.plot(ww,"density",0.01,0.99,25)
 ```
 
-> Distribution is normal. There seems to be a substantial difference in distribution of different qualities. Higher quality wines seems to have lower density.  **density** is very good candidate to check it effects on quality.
+> Distribution is normal. There are very few outliers, some with too high values. To display histogram in a better way, I filtered outlier values by applying a quantile filter between 0.01 - 0.99.
 
 Below are summary of the variable **density**.
 
 ```{r echo=FALSE, Univariate_Plots11, warning=FALSE}
 summary(ww$density)
 
-g1 <- ggplot(aes(x=pH,fill=factor(quality)), data=ww) + geom_histogram(bins=30) + 
-    scale_fill_brewer(palette="Spectral") +
-    labs(fill="quality")
-g2 <- ggplot(aes(x=pH,fill=factor(quality)), data=subset(ww,
-        pH<quantile(ww$pH,0.99) & 
-            pH>quantile(ww$pH,0.01))) + 
-    geom_histogram(bins=20) + scale_fill_brewer(palette="Spectral") + 
-    labs(x = "pH (0.01<Q<0.99)", fill="quality")
-grid.arrange(g1,g2,ncol=2)
+univariate.plot(ww,"pH",0.01,0.99,25)
 ```
 
-> Distribution is normal. There seems to be no substantial difference in distribution of different qualities.
+> Distribution is normal. There are many outliers, most with reasonable values. To display histogram in a better way, I filtered outlier values by applying a quantile filter between 0.01 - 0.99.
 
 Below are summary of the variable **pH**.
 
 ```{r echo=FALSE, Univariate_Plots12, warning=FALSE}
 summary(ww$pH)
 
-g1 <- ggplot(aes(x=sulphates,fill=factor(quality)), data=ww) + geom_histogram(bins=30) + 
-    scale_fill_brewer(palette="Spectral") +
-    labs(fill="quality")
-g2 <- ggplot(aes(x=sulphates,fill=factor(quality)), data=subset(ww,
-        sulphates<quantile(ww$sulphates,0.99) & 
-            sulphates>quantile(ww$sulphates,0.01))) + 
-    geom_histogram(bins=20) + scale_fill_brewer(palette="Spectral") + 
-    labs(x = "sulphates (0.01<Q<0.99)", fill="quality")
-grid.arrange(g1,g2,ncol=2)
+univariate.plot(ww,"sulphates",0.01,0.99,25)
 ```
 
-> Distribution is normal. There seems to be no substantial difference in distribution of different qualities.
+> Distribution is normal. There are many outliers. To display histogram in a better way, I filtered outlier values by applying a quantile filter between 0.01 - 0.99.
 
 Below are summary of the variable **sulphates**.
 
 ```{r echo=FALSE, Univariate_Plots13, warning=FALSE}
 summary(ww$sulphates)
 
-g1 <- ggplot(aes(x=alcohol,fill=factor(quality)), data=ww) + geom_histogram(bins=30) + 
-    scale_fill_brewer(palette="Spectral") +
-    labs(fill="quality")
-g2 <- ggplot(aes(x=alcohol,fill=factor(quality)), data=subset(ww,
-        alcohol<quantile(ww$alcohol,0.99) & 
-            alcohol>quantile(ww$alcohol,0.01))) + 
-    geom_histogram(bins=20) + scale_fill_brewer(palette="Spectral") + 
-    labs(x = "alcohol (0.01<Q<0.99)", fill="quality")
-grid.arrange(g1,g2,ncol=2)
+univariate.plot(ww,"alcohol",0,1,25)
 ```
 
-> Distribution is normal. There seems to be a substantial difference in distribution of different qualities. Higher quality wines seems to have higher levels of alcohol.  **alcohol** is also a very good candidate to check it effects on quality.
+> Distribution is normal. There are no outliers. This is probably because, wines having an accepted alcohol level range which is beween 8 - 14. Therefore, I used a quantile filter between 0 - 1, which will retain all values.
 
 Below are summary of the variable **alcohol**.
 
@@ -295,16 +246,19 @@ gather your observations and add your own if you have other thoughts!
 
 ### What is/are the main feature(s) of interest in your dataset?
 
-> Variables **density** and **alcohol** seem to be showing promising effects on quality of wine. Both seem to be showing substantial differences in distribution of quality.  
+> Quality is our main feature to investigate. I would like to understand what factors could be affecting the quality of wine.  
 
 ### What other features in the dataset do you think will help support your \
 investigation into your feature(s) of interest?
 
-> Variables **volatile.acidity**, **chlorides**, and **total.sulfur.dioxide** also hints at difference in distribution of quality. We will also look into measure their contributin into quality.
+> Variables **alcohol**, **density**, **volatile.acidity**, **chlorides**, could be helping to understand what contributes to quality perception for white wines.
 
 ### Did you create any new variables from existing variables in the dataset?
 
-> No. The most obvious candidate seems to be quality. However, I think leacing quality as is seems to be OK, since there is few different values reported. 
+> Yes. The most obvious candidate seems to be quality. Therefore, I created a new variable named **quality.class** with mapping provided below:
+> 1. Lesser: Qualities 3, 4, 5
+> 2. Average: Quality 6
+> 3. Higher: Qualities: 7, 8, 9
 
 ### Of the features you investigated, were there any unusual distributions? \
 Did you perform any operations on the data to tidy, adjust, or change the form \
@@ -319,26 +273,51 @@ of the data? If so, why did you do this?
 
 # Bivariate Plots Section
 
+Let's first start with a test to see the corelation between all variables:
+
+```{r echo=FALSE, Bivariate_Plots1a, warning=FALSE}
+ggcorr(ww, label = TRUE, nbreaks = 10, size = 3) +
+  theme_grey(base_size = 12)
+```
+> The pairs **alcohol - density**(-0.8) and **density - residual.sugar**(0.8) seem to have exceptionally high correlations. 
+
+> However we are more concerned with **quality** feature. Therefore, we will first look into other variables' interaction with quality.
+
+The highest correation with quality seems to be between **alcohol**(0.4) and **density**(-0.3).  Variables **volatile.acidity**(-0.2), **chlorides**(-0.2), and **total.sulfur.dioxide**(-0.2) also seem to have correlations with quality alas at lot lower measures.
+
 ## Primary Variables
 > 1. **density**
 > 2. **alcohol**
 
-```{r echo=FALSE, Bivariate_Plots1, warning=FALSE}
+```{r echo=FALSE, Bivariate_Plots1b, warning=FALSE}
 options(repr.plot.width=8, repr.plot.height=4)
-ggplot(aes(x=density, y=quality), data=subset(ww,
-        density<quantile(ww$density,0.99) & 
-            density>quantile(ww$density,0.01))) + geom_jitter(alpha=1/10)
+data_s <- subset(ww,
+    density<quantile(ww$density,0.99) & 
+    density>quantile(ww$density,0.01))
+
+ggplot(aes(factor(quality), 
+            density), 
+        data = data_s) +
+  geom_jitter( alpha = .3)  +
+  geom_boxplot( alpha = .5,color = 'blue')+
+  stat_summary(fun.y = "mean", 
+               geom = "point", 
+               color = "red", 
+               shape = 8, 
+               size = 4)
+```
+
+```{r echo=FALSE, Bivariate_Plots1c, warning=FALSE}
+ggplot(
+  aes(x=density,fill=factor(quality)),
+  data=data_s) + 
+  geom_histogram(bins=20) + 
+  scale_fill_brewer(palette="Spectral") + 
+  labs(x = "density (0.01<Q<0.99)", fill="quality")
+
 ```
 
 > With a little jitter for quality, which is a discrete value, it seems there is a negative correlation between density and quality.
-
-```{r echo=FALSE, Bivariate_Plots2, warning=FALSE}
-options(repr.plot.width=8, repr.plot.height=3)
-qplot(y=density,x=factor(quality),
-      data=subset(ww,
-        density<quantile(ww$density,0.99) & 
-            density>quantile(ww$density,0.01)), geom="boxplot")
-```
 
 > Boxplot shows this relation better, with distributions for quality.
 
@@ -348,29 +327,41 @@ Below you can also find numerical values for these box plots:
 by(ww$density,ww$quality,summary)
 
 with(subset(ww,
-        density<quantile(ww$density,0.99) & 
-            density>quantile(ww$density,0.01)),
-     cor.test(density,quality))
+    density<quantile(ww$density,0.99) & 
+    density>quantile(ww$density,0.01)),
+  cor.test(density,quality))
 ```
 
 > **Correlation test shows that there is a correlation between _[-0.34, -0.29]_ for these variables in a confidence level of 95%.**
 
 ```{r echo=FALSE, Bivariate_Plots4, warning=FALSE}
 options(repr.plot.width=8, repr.plot.height=4)
-ggplot(aes(x=alcohol, y=quality), data=subset(ww,
-        alcohol<quantile(ww$alcohol,0.99) & 
-            alcohol>quantile(ww$alcohol,0.01))) + geom_jitter(alpha=1/10)
+data_s <- subset(ww,
+    alcohol<quantile(ww$alcohol,0.99) & 
+    alcohol>quantile(ww$alcohol,0.01))
+
+ggplot(aes(factor(quality), 
+            alcohol), 
+        data = data_s) +
+  geom_jitter( alpha = .3)  +
+  geom_boxplot( alpha = .5,color = 'blue')+
+  stat_summary(fun.y = "mean", 
+               geom = "point", 
+               color = "red", 
+               shape = 8, 
+               size = 4)
+```
+
+```{r echo=FALSE, Bivariate_Plots1, warning=FALSE}
+ggplot(
+  aes(x=alcohol,fill=factor(quality)),
+  data=data_s) + 
+  geom_histogram(bins=20) + 
+  scale_fill_brewer(palette="Spectral") + 
+  labs(x = "alcohol (0.01<Q<0.99)", fill="quality")
 ```
 
 > With a little jitter for quality, which is a discrete value, it seems there is a positive correlation between alcohol and quality.
-
-```{r echo=FALSE, Bivariate_Plots5, warning=FALSE}
-options(repr.plot.width=8, repr.plot.height=3)
-qplot(y=alcohol,x=factor(quality),
-      data=subset(ww,
-        alcohol<quantile(ww$alcohol,0.99) & 
-            alcohol>quantile(ww$alcohol,0.01)), geom="boxplot")
-```
 
 > Boxplot shows this relation better, with distributions for quality.
 
@@ -380,9 +371,9 @@ Below you can also find numerical values for these box plots:
 by(ww$alcohol,ww$quality,summary)
 
 with(subset(ww,
-        alcohol<quantile(ww$alcohol,0.99) & 
-            alcohol>quantile(ww$alcohol,0.01)),
-     cor.test(alcohol,quality))
+    alcohol<quantile(ww$alcohol,0.99) & 
+    alcohol>quantile(ww$alcohol,0.01)),
+  cor.test(alcohol,quality))
 ```
 
 > **Correlation test shows that there is a correlation between [0.40, 0.45] for these variables in a confidence level of 95%.**
@@ -393,15 +384,23 @@ with(subset(ww,
 > 3. **total.sulfur.dioxide**
 
 ```{r echo=FALSE, Bivariate_Plots7, warning=FALSE}
-qplot(y=volatile.acidity,x=factor(quality),
-      data=subset(ww,
-        volatile.acidity<quantile(ww$volatile.acidity,0.99) & 
-            volatile.acidity>quantile(ww$volatile.acidity,0.01)), geom="boxplot")
+data_s <- subset(ww,
+    volatile.acidity<quantile(ww$volatile.acidity,0.99) & 
+    volatile.acidity>quantile(ww$volatile.acidity,0.01))
 
-with(subset(ww,
-        volatile.acidity<quantile(ww$volatile.acidity,0.99) & 
-            volatile.acidity>quantile(ww$volatile.acidity,0.01)),
-     cor.test(volatile.acidity,quality))
+ggplot(aes(factor(quality), 
+            volatile.acidity), 
+        data = data_s) +
+  geom_jitter( alpha = .3)  +
+  geom_boxplot( alpha = .5,color = 'blue')+
+  stat_summary(fun.y = "mean", 
+               geom = "point", 
+               color = "red", 
+               shape = 8, 
+               size = 4)
+
+with(data_s,
+  cor.test(volatile.acidity,quality))
 ```
 
 > **Correlation test shows that there is a correlation between [-0.19, -0.13] for these variables in a confidence level of 95%.**
@@ -409,12 +408,22 @@ with(subset(ww,
 
 
 ```{r echo=FALSE, Bivariate_Plots8, warning=FALSE}
-qplot(y=chlorides,x=factor(quality),
-      data=subset(ww,
-        chlorides<quantile(ww$chlorides,0.99) & 
-            chlorides>quantile(ww$chlorides,0.01)), geom="boxplot")
+data_s <- subset(ww,
+    chlorides<quantile(ww$chlorides,0.99) & 
+    chlorides>quantile(ww$chlorides,0.01))
 
-with(ww,cor.test(chlorides,quality))
+ggplot(aes(factor(quality), 
+            chlorides), 
+        data = data_s) +
+  geom_jitter( alpha = .3)  +
+  geom_boxplot( alpha = .5,color = 'blue')+
+  stat_summary(fun.y = "mean", 
+               geom = "point", 
+               color = "red", 
+               shape = 8, 
+               size = 4)
+
+with(data_s,cor.test(chlorides,quality))
 ```
 
 > **Correlation test shows that there is a correlation between [-0.24 -0.18] for these variables in a confidence level of 95%.**
@@ -422,29 +431,26 @@ with(ww,cor.test(chlorides,quality))
 
 
 ```{r echo=FALSE, Bivariate_Plots9, warning=FALSE}
-qplot(y=total.sulfur.dioxide,x=factor(quality),
-      data=subset(ww,
-        total.sulfur.dioxide<quantile(ww$total.sulfur.dioxide,0.99) & 
-            total.sulfur.dioxide>quantile(ww$total.sulfur.dioxide,0.01)), geom="boxplot")
+data_s <- subset(ww,
+    total.sulfur.dioxide<quantile(ww$total.sulfur.dioxide,0.99) & 
+    total.sulfur.dioxide>quantile(ww$total.sulfur.dioxide,0.01))
 
-with(subset(ww,
-        total.sulfur.dioxide<quantile(ww$total.sulfur.dioxide,0.99) & 
-            total.sulfur.dioxide>quantile(ww$total.sulfur.dioxide,0.01)),
-     cor.test(total.sulfur.dioxide,quality))
+ggplot(aes(factor(quality), 
+            total.sulfur.dioxide), 
+        data = data_s) +
+  geom_jitter( alpha = .3)  +
+  geom_boxplot( alpha = .5,color = 'blue')+
+  stat_summary(fun.y = "mean", 
+               geom = "point", 
+               color = "red", 
+               shape = 8, 
+               size = 4)
+
+with(data_s,
+  cor.test(total.sulfur.dioxide,quality))
 ```
 
 > **Correlation test shows that there is a correlation between [-0.21, -0.16] for these variables in a confidence level of 95%.**
-
-Let's also look into a summary view with **ggpairs** to see if we miss anything of importance since we so far only looked into corelation between quality and other vairalbes. Other variables could also have correlation between each other.
-
-
-```{r echo=FALSE, Bivariate_Plots10, warning=FALSE}
-set.seed(1836)
-options(repr.plot.width=8, repr.plot.height=8)
-ggpairs(ww[sample.int(nrow(ww),1000),])
-```
-
-> The pairs **alcohol - density**(-0.80) and **density - residual.sugar**(0.83) seem to have exceptionally high correlations. 
 
 
 # Bivariate Analysis
@@ -476,53 +482,72 @@ the dataset?
 
 Let's first look into variables that we found have a strong correlation with each other. I would also like to display what qualities they have by applying a colur gradient on data points.
 
-```{r echo=FALSE, Multivariate_Plots1, warning=FALSE}
+
+```{r echo=FALSE, Multivariate_Plots1a, warning=FALSE}
 options(repr.plot.width=8, repr.plot.height=12)
 data_s <- subset(ww,
-    density<quantile(ww$density,0.99) & 
-        density>quantile(ww$density,0.01))
-g1 <- ggplot(data = data_s, aes(x=alcohol, y=density)) +
-  geom_jitter(aes(color=quality),size=1,alpha=0.7) + 
-  scale_colour_gradient(low = "red", high = "green") +
-  geom_smooth(data=subset(data_s,quality>6),colour="green") +
-  geom_smooth(data=subset(data_s,quality<6),colour="red")
+  density<quantile(ww$density,0.99) & 
+  density>quantile(ww$density,0.01))
+ggplot(data = data_s, aes(x=alcohol, y=density, color = quality.class)) +
+  geom_point(alpha = 0.8, size = 1) +
+  geom_smooth(size=1) +
+  scale_color_brewer(palette="Set1", type='seq',
+    guide=guide_legend(title='Quality'))
 
+```
+
+
+```{r echo=FALSE, Multivariate_Plots1b, warning=FALSE}
+options(repr.plot.width=8, repr.plot.height=12)
 data_s <- subset(ww,
-    density<quantile(ww$density,0.99) & 
-        density>quantile(ww$density,0.01))
-g2 <- ggplot(data = data_s, aes(x=residual.sugar, y=density)) +
-  geom_point(aes(color=quality),size=1,alpha=0.7) + 
-  scale_colour_gradient(low = "red", high = "green") + 
-  geom_smooth(data=subset(data_s,quality>6),colour="green") +
-  geom_smooth(data=subset(data_s,quality<6),colour="red")
-
-data_s <- subset(ww,
-    alcohol<quantile(ww$alcohol,0.99) & 
-        alcohol>quantile(ww$alcohol,0.01) &
-        residual.sugar<quantile(ww$residual.sugar,0.99) & 
-        residual.sugar>quantile(ww$residual.sugar,0.01))
-g3 <- ggplot(data = data_s, aes(x=residual.sugar, y=alcohol)) +
-  geom_point(aes(color=quality),size=1,alpha=0.7) + 
-  scale_colour_gradient(low = "red", high = "green") + 
-  geom_smooth(data=subset(data_s,quality>6),colour="green") +
-  geom_smooth(data=subset(data_s,quality<6),colour="red")
-
-grid.arrange(g1,g2,g3,ncol=1)
+  density<quantile(ww$density,0.99) & 
+  density>quantile(ww$density,0.01))
+ggplot(data = data_s, aes(x=alcohol, y=density, color = quality.class)) +
+  geom_point(alpha = 0.8, size = 1) +
+  geom_smooth(size=1) +
+  scale_color_brewer(palette="Set1", type='seq',
+    guide=guide_legend(title='Quality'))
 
 ```
 
 > In **Density - Alcohol** graph we can see that different qualities are actually uniformly distributed in density axes[vertical]. However on alcohol axes[horizontal], we see that the frequency of higher qualities is increasing. We already saw this relationship earlier, so I am not going further into detail.
 
+```{r echo=FALSE, Multivariate_Plots1c, warning=FALSE}
+data_s <- subset(ww,
+  density<quantile(ww$density,0.99) & 
+  density>quantile(ww$density,0.01))
+ggplot(data = data_s, aes(x=residual.sugar, y=density, color = quality.class)) +
+  geom_point(alpha = 0.8, size = 1) +
+  geom_smooth(size=1,method = "lm") +
+  scale_color_brewer(palette="Set1", type='seq',
+    guide=guide_legend(title='Quality'))
+```
+
 > In **Density - residual.sugar** graph, ther seems to be a difference of distribution of different qualities in vertical axes[density]. Perhaps, this hints that higher quality wines tends to be of lower density. However this could also be due to alcohol having an effect on density.
 
+```{r echo=FALSE, Multivariate_Plots1d, warning=FALSE}
+data_s <- subset(ww,
+  alcohol<quantile(ww$alcohol,0.99) & 
+  alcohol>quantile(ww$alcohol,0.01) &
+  residual.sugar<quantile(ww$residual.sugar,0.99) & 
+  residual.sugar>quantile(ww$residual.sugar,0.01))
+ggplot(data = data_s,
+  aes(x=residual.sugar, y=alcohol, color = quality.class)) +
+  geom_point(alpha = 0.8, size = 1) +
+  geom_smooth(size=1,method = "lm") +
+  scale_color_brewer(palette="Set1", type='seq',
+    guide=guide_legend(title='Quality'))
+```
 
 > On the hand, there seems to be a relationship with a newgative correlation between **residual.sugar** and **alcohol**. This makes sense, since to have higher degrees of alcohol, most of sugar needs to be converted/fermented into alcohol. The strage thing about all these graphs is the threeway relationship that we will talk later.
 
 
 To eliminate effect of density on alcohol and vice versa, I will repeat above first two plots by dividing each by the other. 
 
-```{r echo=FALSE, Multivariate_Plots2, warning=FALSE}
-ww$residual.sugar.normalized <- (ww$residual.sugar-min(ww$residual.sugar))/max(ww$residual.sugar)
+```{r echo=FALSE, Multivariate_Plots2a, warning=FALSE}
+mn_rs <- min(ww$residual.sugar)
+mx_rs <- max(ww$residual.sugar)
+ww$residual.sugar.normalized <- (ww$residual.sugar-mn_rs)/mx_rs
 ww$alcohol.normalized <- (ww$alcohol - min(ww$alcohol))/max(ww$alcohol)
 
 
@@ -533,27 +558,30 @@ data_s <- subset(ww,
         density>quantile(ww$density,0.01) &
         residual.sugar.normalized != 0)
 
-g1 <- ggplot(data = data_s, aes(x=alcohol, y=density/residual.sugar.normalized)) +
-  geom_jitter(aes(color=quality),size=1,alpha=0.7) + 
-  scale_colour_gradient(low = "red", high = "green") + 
+ggplot(data = data_s,
+  aes(x=alcohol,y=density/residual.sugar.normalized, color = quality.class)) +
+  geom_point(alpha = 0.8, size = 1) +
+  geom_smooth(size=1,method = "lm") +
+  scale_color_brewer(palette="Set1", type='seq',
+    guide=guide_legend(title='Quality')) + 
   scale_y_log10() +
-  scale_x_log10() +
-  geom_smooth(data=subset(data_s,quality>6),colour="green") +
-  geom_smooth(data=subset(data_s,quality<6),colour="red")
+  scale_x_log10()
+```
 
+```{r echo=FALSE, Multivariate_Plots2b, warning=FALSE}
 data_s <- subset(ww,
-    density<quantile(ww$density,0.99) & 
-        density>quantile(ww$density,0.01) &
-        alcohol.normalized != 0)
-g2 <- ggplot(data = data_s, aes(x=residual.sugar, y=density/alcohol.normalized)) +
-  geom_point(aes(color=quality),size=1,alpha=0.7) + 
-  scale_colour_gradient(low = "red", high = "green") + 
+  density<quantile(ww$density,0.99) & 
+  density>quantile(ww$density,0.01) &
+  alcohol.normalized != 0)
+ggplot(data = data_s, 
+  aes(x=residual.sugar, y=density/alcohol.normalized, color = quality.class)) +
+  geom_point(alpha = 0.8, size = 1) +
+  geom_smooth(size=1,method = "lm") +
+  scale_color_brewer(palette="Set1", type='seq',
+    guide=guide_legend(title='Quality')) + 
   scale_y_log10() +
-  scale_x_log10() +
-  geom_smooth(data=subset(data_s,quality>6),colour="green") +
-  geom_smooth(data=subset(data_s,quality<6),colour="red")
+  scale_x_log10()
 
-grid.arrange(g1,g2,ncol=1)
 ```
 
 > It seems when we removed **residual.sugar** effect from density by dividing density by normalized (0-1) residual sugar values, the relationship with alcohol seems to be still there. Therefore, we can presume that most of *density alcohol* relationship is actually **alcohol** oriented. However, this relationship breaks at the higher the alcohol levels. This hints that sugar effect on density becomes significant at these levels.
@@ -568,13 +596,13 @@ summary(ww$pH)
 
 options(repr.plot.width=8, repr.plot.height=6)
 data_s <- subset(ww,
-    chlorides<quantile(ww$chlorides,0.99) & 
-        chlorides>quantile(ww$chlorides,0.01))
-ggplot(data = data_s, aes(x=chlorides, y=pH)) +
-  geom_jitter(aes(color=quality),size=1,alpha=0.7) + 
-  scale_colour_gradient(low = "red", high = "green") + 
-  geom_smooth(data=subset(data_s,quality>6),colour="green") +
-  geom_smooth(data=subset(data_s,quality<6),colour="red")  +
+  chlorides<quantile(ww$chlorides,0.99) & 
+  chlorides>quantile(ww$chlorides,0.01))
+ggplot(data = data_s, aes(x=chlorides, y=pH, color = quality.class)) +
+  geom_point(alpha = 0.8, size = 1) +
+  geom_smooth(size=1,method = "lm") +
+  scale_color_brewer(palette="Set1", type='seq',
+    guide=guide_legend(title='Quality')) +
   scale_x_log10() +
   labs(title="Chlorides vs pH")
 
@@ -584,38 +612,42 @@ with(ww,cor.test(pH,chlorides))
 > I am actually surprized that higher pH(lower acidity) does not correlate to higher amount of chlorides, as I would expect. Therefore, I would like to look into chlorides by eliminating effect of acids on pH.
 
 ```{r echo=FALSE, Multivariate_Plots4, warning=FALSE}
-ww$fixed.acidity.normalized <- (ww$fixed.acidity-min(ww$fixed.acidity))/max(ww$fixed.acidity)
+mn_fa <- min(ww$fixed.acidity)
+mx_fa <- max(ww$fixed.acidity)
+ww$fixed.acidity.normalized <- (ww$fixed.acidity-mn_fa)/mx_fa
 ww$pH_fixed.acidity.normalized <- ww$pH / ww$fixed.acidity.normalized
 options(repr.plot.width=8, repr.plot.height=6)
 data_s <- subset(ww,
-    pH_fixed.acidity.normalized<quantile(ww$pH_fixed.acidity.normalized,0.99) & 
-        pH_fixed.acidity.normalized>quantile(ww$pH_fixed.acidity.normalized,0.01) &
-        chlorides<quantile(ww$chlorides,0.99) &
-        chlorides>quantile(ww$chlorides,0.01))
-ggplot(data = data_s, aes(x=chlorides, y=pH_fixed.acidity.normalized)) +
-  geom_point(aes(color=quality),size=1,alpha=0.7) + 
-  scale_colour_gradient(low = "red", high = "green") +
-  geom_smooth(data=subset(data_s,quality>6),colour="green",show.legend=TRUE) +
-  geom_smooth(data=subset(data_s,quality<6),colour="red",show.legend=TRUE)  +
+  pH_fixed.acidity.normalized<quantile(ww$pH_fixed.acidity.normalized,0.99) &
+  pH_fixed.acidity.normalized>quantile(ww$pH_fixed.acidity.normalized,0.01) &
+  chlorides<quantile(ww$chlorides,0.99) &
+  chlorides>quantile(ww$chlorides,0.01))
+ggplot(data = data_s,
+    aes(x=chlorides, y=pH_fixed.acidity.normalized, color = quality.class)) +
+  geom_point(alpha = 0.8, size = 1) +
+  geom_smooth(size=1,method = "lm") +
+  scale_color_brewer(palette="Set1", type='seq',
+    guide=guide_legend(title='Quality')) +
   scale_x_log10() +
-  labs(title="Chlorides vs pH / fixed.acidity.normalized", y = "pH / fixed.acidity.normalized")
+  labs(title="Chlorides vs pH / fixed.acidity.normalized",
+    y = "pH / fixed.acidity.normalized")
 ```
 
-This graph shows no significant difference to the original graph. Therefore, we can conclude that removing acidity has no effect on chloride - quality relationship. 
+> Strangely, removing effects of **fixed.acidity** improved the visibility between different quality class. With this new graph we can say that higher quality wines tend to have lower levels of **ph / fixed.acidity** ratios. 
 
 ```{r echo=FALSE, Multivariate_Plots5, warning=FALSE}
 options(repr.plot.width=8, repr.plot.height=6)
 data_s <- subset(ww,
-    chlorides<quantile(ww$chlorides,0.99) & 
-        chlorides>quantile(ww$chlorides,0.01) & 
-        residual.sugar<quantile(ww$residual.sugar,0.99) & 
-        residual.sugar>quantile(ww$residual.sugar,0.01))
-ggplot(data = data_s, aes(x=chlorides, y=residual.sugar)) +
-  geom_jitter(aes(color=quality),size=1,alpha=0.7) + 
-  scale_colour_gradient(low = "red", high = "green") +
-  scale_x_log10() +
-  geom_smooth(data=subset(data_s,quality>6),colour="green") +
-  geom_smooth(data=subset(data_s,quality<6),colour="red") 
+  chlorides<quantile(ww$chlorides,0.99) & 
+  chlorides>quantile(ww$chlorides,0.01) & 
+  residual.sugar<quantile(ww$residual.sugar,0.99) & 
+  residual.sugar>quantile(ww$residual.sugar,0.01))
+ggplot(data = data_s, aes(x=chlorides, y=residual.sugar, color = quality.class)) +
+  geom_point(alpha = 0.8, size = 1) +
+  geom_smooth(size=1,method = "lm") +
+  scale_color_brewer(palette="Set1", type='seq',
+    guide=guide_legend(title='Quality')) +
+  scale_x_log10() 
 ```
 
 > Above graph shows scatter plot for **residual.sugar** vs. **chlorides**. Unlike bad quality [3,6) wines, the good quality (6,9] wines tend to have low levels of residual.sugar until it reaches a certain level of **chlorides**. Clorides being salt ingredient is possibly compensated with added sugars.
@@ -648,16 +680,18 @@ strengths and limitations of your model.
 ### Plot One
 ```{r echo=FALSE, Plot_One, warning=FALSE}
 data_s <- subset(ww,
-    alcohol<quantile(ww$alcohol,0.99) & 
-        alcohol>quantile(ww$alcohol,0.01) &
-        residual.sugar<quantile(ww$residual.sugar,0.99) & 
-        residual.sugar>quantile(ww$residual.sugar,0.01))
-ggplot(data = data_s, aes(x=residual.sugar, y=alcohol)) +
-  geom_point(aes(color=quality),size=1,alpha=0.7) + 
-  scale_colour_gradient(low = "red", high = "green") + 
-  geom_smooth(data=subset(data_s,quality>6),colour="green") +
-  geom_smooth(data=subset(data_s,quality<6),colour="red") +
-  labs(y="Alcohol %", x="Residual Sugar (gram / liter)", title="Alcohol vs. Residual Sugar - Scatter Plot")
+  alcohol<quantile(ww$alcohol,0.99) & 
+  alcohol>quantile(ww$alcohol,0.01) &
+  residual.sugar<quantile(ww$residual.sugar,0.99) & 
+  residual.sugar>quantile(ww$residual.sugar,0.01))
+ggplot(data = data_s,
+  aes(x=residual.sugar, y=alcohol, color = quality.class)) +
+  geom_point(alpha = 0.8, size = 1) +
+  geom_smooth(size=1,method = "lm") +
+  scale_color_brewer(palette="Set1", type='seq',
+    guide=guide_legend(title='Quality')) +
+  labs(y="Alcohol %", x="Residual Sugar (gram / liter)",
+    title="Alcohol vs. Residual Sugar - Scatter Plot")
 ```
 
 ### Description One
@@ -668,12 +702,15 @@ ggplot(data = data_s, aes(x=residual.sugar, y=alcohol)) +
 
 ### Plot Two
 ```{r echo=FALSE, Plot_Two, warning=FALSE}
-ggplot(aes(x=residual.sugar,fill=factor(quality)), data=subset(ww,
-        residual.sugar<quantile(ww$residual.sugar,0.99) & 
-            residual.sugar>quantile(ww$residual.sugar,0.0))) + 
-    geom_histogram(bins=30) + scale_fill_brewer(palette="Spectral") +
-    scale_x_log10() +
-    labs(x = "Residual Sugar (gram / liter)", y="# of samples", title="Residual Sugar per Liter Wine - Histogram", fill="quality")
+ggplot(aes(x=residual.sugar,fill=factor(quality)),
+  data=subset(ww,
+    residual.sugar<quantile(ww$residual.sugar,0.99) & 
+    residual.sugar>quantile(ww$residual.sugar,0.0))) + 
+  geom_histogram(bins=30) +
+  scale_fill_brewer(palette="Spectral") +
+  scale_x_log10() +
+  labs(x = "Residual Sugar (gram / liter)", y="# of samples",
+    title="Residual Sugar per Liter Wine - Histogram", fill="quality")
 ```
 
 ### Description Two
@@ -683,17 +720,21 @@ ggplot(aes(x=residual.sugar,fill=factor(quality)), data=subset(ww,
 ### Plot Three
 ```{r echo=FALSE, Plot_Three, warning=FALSE}
 data_s <- subset(ww,
-    density<quantile(ww$density,0.99) & 
-        density>quantile(ww$density,0.01) &
-        alcohol.normalized != 0)
-ggplot(data = data_s, aes(x=residual.sugar, y=density/alcohol.normalized)) +
-  geom_point(aes(color=quality),size=1,alpha=0.7) + 
-  scale_colour_gradient(low = "red", high = "green") + 
+  density<quantile(ww$density,0.99) & 
+  density>quantile(ww$density,0.01) &
+  alcohol.normalized != 0)
+ggplot(data = data_s, 
+  aes(x=residual.sugar, y=density/alcohol.normalized, color = quality.class)) +
+  geom_point(alpha = 0.8, size = 1) +
+  geom_smooth(size=1,method = "lm") +
+  scale_color_brewer(palette="Set1", type='seq',
+    guide=guide_legend(title='Quality')) + 
   scale_y_log10() +
   scale_x_log10() +
-  geom_smooth(data=subset(data_s,quality>6),colour="green") +
-  geom_smooth(data=subset(data_s,quality<6),colour="red") +
-  labs(x="Residual Sugar (gram / liter)", y="Density (g / l) / Norm. Alcohol (%)", title="Residual Sugar vs. Density / Norm. Alcohol")
+  labs(
+    x="Residual Sugar (gram / liter)",
+    y="Density (g / l) / Norm. Alcohol (%)",
+    title="Residual Sugar vs. Density / Norm. Alcohol")
 ```
 
 ### Description Three
@@ -711,5 +752,7 @@ Data set has 12 attributes each of which are quite meaningful and provides enoug
 Data set has a sample size of 4898. This small sample size causes problems throught data exploration. The lack of required number of samples for a particular subgroup makes it difficult to conclude on some potential findings that otherwise, would be significant.  
 
 Data set is complete and consistent enough that it does not seem to have entries with missing values or meaningless values. This eases the data exploration. Throughout the data analysis process, the data showed consistent results in terms of completeness and distribution of data points.  
+
+The challange for me during this data exploration process was to understand relationship between variables that wouldnt easily give up there secrets. I failed to find correlation where I would expect them most. On the other hand, I encountered them in places that I least expected. Even though most of relationships could be more or less explained, they are mostly hidden until I reached them by visualizing this relationships. 
 
 Even though the process of finding a useful model or relationship for quality seems trivial, after a few steps it becomes more apparent that the quality is a much more complex phenomenon and human perception depends on a more complex set of variables. At this point, it seems to me that it would be useful to know what exactly made the taster to score the wine high or low quality. For instance, it could have been noted that the taster liked its sweetness, acidity, alcohol ratio etc. 
