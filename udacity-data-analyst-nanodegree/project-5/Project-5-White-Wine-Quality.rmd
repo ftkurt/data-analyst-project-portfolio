@@ -2,7 +2,6 @@ White Wine Quality by Fatih Kurt
 ========================================================
 
 
-
 ```{r echo=FALSE, message=FALSE, warning=FALSE, packages}
 # Load all of the packages that you end up using in your analysis in this code
 # chunk.
@@ -20,6 +19,11 @@ library(repr) # resize plot
 library(gridExtra) # grid for plots
 library(GGally) # ggpairs - multivariate summary
 library(plyr) # numeric ops
+library(plotrix) # 3d pie
+```
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(echo=FALSE, warning=FALSE, message=FALSE)
 ```
 
 ```{r echo=FALSE, Load_the_Data, warning=FALSE}
@@ -72,15 +76,19 @@ summary(ww)
 
 Our data set consists of 4898 entries each with 12 variables / columns. 
 
-```{r echo=FALSE, Univariate_Plots2, warning=FALSE}
+```{r echo=FALSE, Univariate_Plots2a, warning=FALSE}
 options(repr.plot.width=8, repr.plot.height=3)
-g1 <- ggplot(aes(x=quality), data=ww) + 
-  geom_histogram(binwidth=1, bins=10)
-g2 <- ggplot(aes(x=quality), data=ww) + 
-  geom_histogram(binwidth=1, bins=10) + 
-  scale_y_log10()
-grid.arrange(g1,g2,ncol=2)
-```
+quality <- table(ww$quality)
+par(mfrow = c(1,2))
+c_palette = c("#ff0000","#d42b11","#aa5522",
+    "#808033","#55aa22","#2bd411","#00ff00")
+barplot(quality, main="Class Distribution", 
+  	ylab="Count of Quality", col=c_palette,
+  	xlab="Quality")
+barplot(quality, main="Class Distribution", 
+  	ylab="Count of Quality (Log)", 
+  	col=c_palette, xlab="Quality", log="y")
+``` 
 
 > Graphs above show that with majority being around quality 5-7, only few wines are of quality 9 or 3. Second graph shows distribution in a vertical logarithmic scale.
 
@@ -92,6 +100,20 @@ grid.arrange(g1,g2,ncol=2)
 ```{r echo=FALSE, Multivariate_Plots1e, warning=FALSE}
 ww$quality.class <- mapvalues(ww$quality, from = c(3,4,5,6,7,8,9), to = c("lesser","lesser","lesser","average","higher","higher","higher"))
 
+```
+
+> New stats for **quality.class**:
+```{r echo=FALSE, Univariate_Plots2b, warning=FALSE}
+options(repr.plot.width=8, repr.plot.height=3)
+
+quality.class <- table(ww$quality.class)
+par(mfrow = c(1,2))
+barplot(quality.class, main="Quality Class Distribution", 
+  	ylab="Count of Quality Class", 
+  	xlab="Quality Class", col=c("yellow", "blue", "red"))
+pie3D(quality.class, col=c("yellow", "blue", "red"), theta=pi/3,
+    explode=0, main="Frequencies from Quality Class",
+    labels=names(quality.class))
 ```
 
 Let's all also look into distribution of other variables with respect to quality. 
@@ -153,7 +175,7 @@ Below are summary of the variable **citric.acid**.
 summary(ww$citric.acid)
 
 univariate.plot(ww,"residual.sugar",0,1,35) +
-  scale_x_log10()
+  scale_x_log10(breaks=round(c(.75,1,10^0.25,10^0.5,10^0.75,10,10^1.25,10^1.5), digits = 2))
 ```
 
 > Distribution is skew towards right. But when plotted in logarithmic scale the distribution seems to be bimodal. There are very few outliers, some with too high values. I already plotted histogram in logarithmic x scale, so I didn't need to apply further quantile filtering. I used a quantile filter between 0 - 1, which will retain all values without filtering.
@@ -236,10 +258,6 @@ summary(ww$alcohol)
 
 # Univariate Analysis
 
-> **Tip**: Now that you've completed your univariate explorations, it's time to
-reflect on and summarize what you've found. Use the questions below to help you
-gather your observations and add your own if you have other thoughts!
-
 ### What is the structure of your dataset?
 
 > Data set consists of around 5k observations. Each observation has values for 12 different variables. In addition to this variables, each has a quality rating. 
@@ -279,6 +297,7 @@ Let's first start with a test to see the corelation between all variables:
 ggcorr(ww, label = TRUE, nbreaks = 10, size = 3) +
   theme_grey(base_size = 12)
 ```
+
 > The pairs **alcohol - density**(-0.8) and **density - residual.sugar**(0.8) seem to have exceptionally high correlations. 
 
 > However we are more concerned with **quality** feature. Therefore, we will first look into other variables' interaction with quality.
