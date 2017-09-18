@@ -11930,7 +11930,7 @@ se <span class="o">&lt;-</span> read.csv<span class="p">(</span><span class="s">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <blockquote><p><strong>Independent variable</strong> or the variable changed here for the experiment is the <u>text of colors/ink</u>.</p>
-<p><strong>Dependent variable</strong> or the variable which is observed is the <u>duration in which participant names all ink colors.</u>.</p>
+<p><strong>Dependent variable</strong> or the variable which is observed is the <u>duration in which a person names all ink colors.</u>.</p>
 </blockquote>
 
 </div>
@@ -11976,12 +11976,27 @@ se <span class="o">&lt;-</span> read.csv<span class="p">(</span><span class="s">
 <div class="text_cell_render border-box-sizing rendered_html">
 <p><strong>Null Hypothesis:</strong></p>
 <ul>
-<li>H<sub>0</sub> --&gt; Duration in which paticipant names ink color does not change when color/ink text is changed.</li>
+<li><strong>H<sub>0</sub></strong>: μ = μ<sub>0</sub> --&gt; Changing text of color to another color will <strong>have no effect</strong> on mean duration of naming an ink color.</li>
 </ul>
 <p><strong>Alternate Hypothesis:</strong></p>
 <ul>
-<li>H<sub>A</sub> --&gt; Duration in which participant names in color increases significantly.</li>
+<li><strong>H<sub>A</sub></strong>: μ &gt; μ<sub>0</sub> --&gt; Changing text of color to another color will <strong>increase</strong> mean duration of naming an ink color.</li>
 </ul>
+<hr>
+<blockquote><p><strong>μ</strong>: Population mean after experimented change</p>
+<p><strong>μ<sub>0</sub></strong>: Population mean prior to change</p>
+</blockquote>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<blockquote><p>We don't know population parameters, we only have two dependent samples from the same subject group. The experiment process fits into pre-test / post-test design. Therefore, we are going to apply <strong>dependent t-test for paired samples</strong>:</p>
+</blockquote>
 
 </div>
 </div>
@@ -12117,8 +12132,7 @@ se <span class="o">&lt;-</span> read.csv<span class="p">(</span><span class="s">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <p><strong>Standart Deviation:</strong></p>
-<p><strong>Congruent</strong> --&gt; 3.56</p>
-<p><strong>Incongruent</strong> --&gt; 4.80</p>
+<p>StDev(Congruent, Incongruent) --&gt; (3.56, 4.80)</p>
 <hr>
 
 </div>
@@ -12350,10 +12364,11 @@ IzSw/g+TFP9o9eua8AAAAABJRU5ErkJggg=="
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Degrees of freedom = (24 -1) + (24 -1) = 46</p>
+<p>Degrees of freedom = (n - 1) = (24 - 1)</p>
+<p>Degrees of freedom = 23</p>
 <blockquote><p>Since our alternate hypothesis indicates that the duration will increase, we can apply one tailed test at positive direction.</p>
 </blockquote>
-<p>t<sub>critical</sub> = 2.678</p>
+<p>t<sub>critical</sub> = 1.714</p>
 
 </div>
 </div>
@@ -12401,7 +12416,8 @@ IzSw/g+TFP9o9eua8AAAAABJRU5ErkJggg=="
 <div class="prompt input_prompt">In&nbsp;[12]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-r"><pre><span></span>t_statistic <span class="o">=</span> <span class="p">(</span><span class="m">22.02</span> <span class="o">-</span> <span class="m">14.05</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="m">4.86</span><span class="o">/</span><span class="kp">sqrt</span><span class="p">(</span><span class="m">25</span><span class="p">))</span>
+<div class=" highlight hl-r"><pre><span></span>t_statistic <span class="o">=</span> <span class="p">(</span><span class="kp">mean</span><span class="p">(</span>se<span class="o">$</span>Incongruent<span class="p">)</span> <span class="o">-</span> <span class="kp">mean</span><span class="p">(</span>se<span class="o">$</span>Congruent<span class="p">))</span> <span class="o">/</span>
+                <span class="p">(</span>sd<span class="p">(</span>se<span class="o">$</span><span class="kp">diff</span><span class="p">)</span> <span class="o">/</span> <span class="kp">sqrt</span><span class="p">(</span><span class="kp">length</span><span class="p">(</span>se<span class="o">$</span><span class="kp">diff</span><span class="p">)))</span>
 t_statistic
 </pre></div>
 
@@ -12416,7 +12432,7 @@ t_statistic
 <div class="output_area"><div class="prompt"></div>
 
 <div class="output_html rendered_html output_subarea ">
-8.19958847736625
+8.02070694410996
 </div>
 
 </div>
@@ -12430,7 +12446,7 @@ t_statistic
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>t<sub>statistic</sub> = 8.20</p>
+<p>t<sub>statistic</sub> = 8.02</p>
 
 </div>
 </div>
@@ -12440,8 +12456,8 @@ t_statistic
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>t<sub>statistic</sub> = 8.20 is much larger than t<sub>critical</sub> = 2.678. Therefore, we can conclude that our <u>**Null Hypothesis is wrong**</u> ,and our <u>**Alternate Hypothesis is correct**</u>.</p>
-<p>This means that changing ink text to a color name other than the ink color definitely increases the duration.</p>
+<p>t<sub>statistic</sub> = 8.02 is much larger than t<sub>critical</sub> = 1.714. Therefore, we can conclude that our <u>**Null Hypothesis is wrong**</u> ,and our <u>**Alternate Hypothesis is correct**</u>.</p>
+<p>This means that changing ink text to a color name other than the ink color definitely increases the mean duration.</p>
 
 </div>
 </div>

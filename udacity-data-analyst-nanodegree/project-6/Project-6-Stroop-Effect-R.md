@@ -72,7 +72,7 @@ As a general note, be sure to keep a record of any resources that you use or ref
 
 > **Independent variable** or the variable changed here for the experiment is the <u>text of colors/ink</u>.  
 
-> **Dependent variable** or the variable which is observed is the <u>duration in which participant names all ink colors.</u>.  
+> **Dependent variable** or the variable which is observed is the <u>duration in which a person names all ink colors.</u>.  
 
 ## 2. What is an appropriate set of hypotheses for this task? What kind of statistical test do you expect to perform? Justify your choices.
 
@@ -86,10 +86,17 @@ As a general note, be sure to keep a record of any resources that you use or ref
 ______
 
 **Null Hypothesis:**
-* H<sub>0</sub> --> Duration in which paticipant names ink color does not change when color/ink text is changed.
+* **H<sub>0</sub>**: μ = μ<sub>0</sub> --> Changing text of color to another color will **have no effect** on mean duration of naming an ink color.
 
 **Alternate Hypothesis:**
-* H<sub>A</sub> --> Duration in which participant names in color increases significantly.
+* **H<sub>A</sub>**: μ > μ<sub>0</sub> --> Changing text of color to another color will **increase** mean duration of naming an ink color.
+___________
+
+> **μ**: Population mean after experimented change
+
+> **μ<sub>0</sub>**: Population mean prior to change
+
+> We don't know population parameters, we only have two dependent samples from the same subject group. The experiment process fits into pre-test / post-test design. Therefore, we are going to apply **dependent t-test for paired samples**:
 
 ## 3. Report some descriptive statistics regarding this dataset. Include at least one measure of central tendency and at least one measure of variability.
 
@@ -133,9 +140,7 @@ sd(se$Incongruent)
 
 **Standart Deviation:**
 
-**Congruent** --> 3.56
-
-**Incongruent** --> 4.80
+StDev(Congruent, Incongruent) --> (3.56, 4.80)
 ______
 
 ## 4. Provide one or two visualizations that show the distribution of the sample data. Write one or two sentences noting what you observe about the plot or plots.
@@ -149,7 +154,7 @@ grid.arrange(g1,g2,ncol=2)
 ```
 
 
-![png](output_22_0.png)
+![png](output_23_0.png)
 
 
 > Both graphs seem to have a normal distribution with a few outliers at higher durations. For **Congruent** distribution, mean normal distribution is around 14, while this value is around 22 for **Incongruent** distribution.
@@ -164,11 +169,13 @@ se$diff <- (se$Congruent - se$Incongruent)
 
 I would like to set my critical value alpha at 0.05
 
-Degrees of freedom = (24 -1) + (24 -1) = 46
+Degrees of freedom = (n - 1) = (24 - 1)
+
+Degrees of freedom = 23
 
 > Since our alternate hypothesis indicates that the duration will increase, we can apply one tailed test at positive direction.
 
-t<sub>critical</sub> = 2.678
+t<sub>critical</sub> = 1.714
 
 
 ```R
@@ -183,19 +190,20 @@ S<sub>D</sub> = 4.86
 
 
 ```R
-t_statistic = (22.02 - 14.05)/(4.86/sqrt(25))
+t_statistic = (mean(se$Incongruent) - mean(se$Congruent)) /
+                (sd(se$diff) / sqrt(length(se$diff)))
 t_statistic
 ```
 
 
-8.19958847736625
+8.02070694410996
 
 
-t<sub>statistic</sub> = 8.20
+t<sub>statistic</sub> = 8.02
 
-t<sub>statistic</sub> = 8.20 is much larger than t<sub>critical</sub> = 2.678. Therefore, we can conclude that our <u>**Null Hypothesis is wrong**</u> ,and our <u>**Alternate Hypothesis is correct**</u>.
+t<sub>statistic</sub> = 8.02 is much larger than t<sub>critical</sub> = 1.714. Therefore, we can conclude that our <u>**Null Hypothesis is wrong**</u> ,and our <u>**Alternate Hypothesis is correct**</u>.
 
-This means that changing ink text to a color name other than the ink color definitely increases the duration. 
+This means that changing ink text to a color name other than the ink color definitely increases the mean duration. 
 
 ## 6. Optional: What do you think is responsible for the effects observed? Can you think of an alternative or similar task that would result in a similar effect? Some research about the problem will be helpful for thinking about these two questions!
 
