@@ -1,8 +1,8 @@
 
 # Effects of Handedness on Baseball Players Key Performance Metrics
 
-> * [Link](https://dub01.online.tableau.com/#/site/udacitynanodegreeprojects/views/EffectsofHandednessonBaseballPlayersKeyPerformanceMetrics/Story1?:iid=1) the to story.
-> * [Link](https://dub01.online.tableau.com/#/site/udacitynanodegreeprojects/workbooks/216394/views) to the revised story with feedbacks.
+> * [Link](https://public.tableau.com/profile/fatih.kurt#!/vizhome/EffectsofHandednessonBaseballPlayersKeyPerformanceMetrics/Story1?publish=yes) the to story.
+> * [Link](https://public.tableau.com/profile/fatih.kurt#!/vizhome/EffectsofHandednessonBaseballPlayersKeyPerformanceMetricsrevised/Story1?publish=yes) to the revised story with feedbacks.
 
 ## Summary
 
