@@ -11764,7 +11764,7 @@ div#notebook {
 <div class="text_cell_render border-box-sizing rendered_html">
 <p>This project aims to build an efficient machine learning algorithm to programatically detect potential persons of interest within data. The model is expected to make the best use of available features withing Enron Dataset as well as creating new features to predict the poi from the available features.</p>
 <p>Enron data has 146 data points, 18 of which belong POIs. Each datapoint has 14 features. Features cover a wide variety of data from financial attributes like salary, bonuses, payments to email statistics like emails to POI, and emails from POI. Almost all features have missing values. We should also address this issue during this project.</p>
-<p>Dataset has one outlier data which belongs to an entry named "TOTAL". This entry clearly points to the subtotal for the entire dataset, and thereby should be discarded. Discaridng this entry leaves 18 POI and 127 non-POI entries. With 12.4% POI within dataset, data is skewed towards non-POIs. We should keep an eye on this insight during score extractions from models. Assuming we are primarily concerned with detecting as many POIs as possible, recall will be the primary score we will be looking to.</p>
+<p>Dataset has one outlier data which belongs to an entry named <em>TOTAL</em>. This entry clearly points to the subtotal for the entire dataset, and thereby should be discarded. Another entry named <em>LOCKHART EUGENE E</em> has no data point. Therefore we also di,scarded this. Discaridng these entries leaves 18 POI and 126 non-POI entries. With 12.5% POI within dataset, data is skewed towards non-POIs. We should keep an eye on this insight during score extractions from models. Assuming we are primarily concerned with detecting as many POIs as possible, recall will be the primary score we will be looking to.</p>
 
 </div>
 </div>
@@ -11786,7 +11786,7 @@ div#notebook {
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <p>Since the number of variables was within acecptable range, I started with the full set to decide on an model parameters. Later on I was planning on reducing number of parameters. First approach was using Tree Classifier parameter weights extracted from trained classifier usign full variable set.</p>
-<h4 id="Here-is-list-of-parameters-with-non-zero-values:">Here is list of parameters with non-zero values:<a class="anchor-link" href="#Here-is-list-of-parameters-with-non-zero-values:">&#182;</a></h4><table>
+<h4 id="Here-is-list-of-parameters-with-non-zero-values-(Weights-before-New-Features):">Here is list of parameters with non-zero values (Weights before New Features):<a class="anchor-link" href="#Here-is-list-of-parameters-with-non-zero-values-(Weights-before-New-Features):">&#182;</a></h4><table>
 <thead><tr>
 <th>Parameter</th>
 <th>Weight</th>
@@ -11794,28 +11794,40 @@ div#notebook {
 </thead>
 <tbody>
 <tr>
-<td>from_poi_ratio</td>
-<td>0.410935</td>
+<td>from_this_person_to_poi</td>
+<td>0.247</td>
 </tr>
 <tr>
-<td>total_stock_value</td>
-<td>0.188715</td>
+<td>expenses</td>
+<td>0.16</td>
 </tr>
 <tr>
-<td>bonus</td>
-<td>0.124453</td>
+<td>deferral_payments</td>
+<td>0.149</td>
 </tr>
 <tr>
-<td>shared_receipt_with_poi</td>
-<td>0.106765</td>
-</tr>
-<tr>
-<td>to_messages</td>
-<td>0.105462</td>
+<td>restricted_stock_deferred</td>
+<td>0.094</td>
 </tr>
 <tr>
 <td>restricted_stock</td>
-<td>0.063670</td>
+<td>0.082</td>
+</tr>
+<tr>
+<td>shared_receipt_with_poi</td>
+<td>0.078</td>
+</tr>
+<tr>
+<td>from_messages</td>
+<td>0.075</td>
+</tr>
+<tr>
+<td>other</td>
+<td>0.055</td>
+</tr>
+<tr>
+<td>deferred_income</td>
+<td>0.055</td>
 </tr>
 </tbody>
 </table>
@@ -11828,9 +11840,122 @@ div#notebook {
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>My second approach was finding variables having &gt; 0.9 correlation with poi and &gt;0.9 correlation with those that have &gt;0.9 correlation with poi, and so forth until a depth value. I used a depth of 1.</p>
 <p>I did not use any scaling, knowing scaling would have no effect on tree classifiers which I believed will be optimal predictors for this project. However, I filled missing values each with a <strong>GaussianNB</strong> predictor that used all parameters other than the original one plus the <strong>poi</strong> parameter. Later on the predictions from <strong>GaussianNB</strong> predictor are used to fill missing values.</p>
 <p>I created two new variables, one for <strong>ratio of mails received from POIs</strong>, and the other for <strong>ratio of mail sent to POIs</strong>. I believe the numbers of mails sent to POI or received thereof would not give meaningful info. SOme might be sending too many emails or too few emails overall. In this case, having the ratio for their POI related emails would provide better insight.</p>
+<h4 id="Weights-after-New-Features:">Weights after New Features:<a class="anchor-link" href="#Weights-after-New-Features:">&#182;</a></h4><table>
+<thead><tr>
+<th>Parameter</th>
+<th>Weight</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>to_poi_ratio</td>
+<td>0.365</td>
+</tr>
+<tr>
+<td>expenses</td>
+<td>0.167</td>
+</tr>
+<tr>
+<td>shared_receipt_with_poi</td>
+<td>0.111</td>
+</tr>
+<tr>
+<td>restricted_stock</td>
+<td>0.11</td>
+</tr>
+<tr>
+<td>restricted_stock_deferred</td>
+<td>0.094</td>
+</tr>
+<tr>
+<td>deferral_payments</td>
+<td>0.093</td>
+</tr>
+<tr>
+<td>other</td>
+<td>0.055</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h4 id="New-Features-and-Their-Contribution-to-the-Classification:">New Features and Their Contribution to the Classification:<a class="anchor-link" href="#New-Features-and-Their-Contribution-to-the-Classification:">&#182;</a></h4><p><strong>from_poi_ratio:</strong> ratio of mails received from POIs</p>
+<p><strong>to_poi_ratio:</strong> ratio of mail sent to POIs</p>
+<p>From first run with full feature list, I concluded that <em>from_poi_ratio</em> contributed to the classification better than any other variable with a weight of 0.28. However, <em>to_poi_ratio</em> seems to be contribution no meaningfull information. On the other hand, addition of these new features changed weights of other parameters. Most notably, <em>from_poi_to_this_person</em> is down to out of list from top position with 0.29.</p>
+<h4 id="Second-Approach:">Second Approach:<a class="anchor-link" href="#Second-Approach:">&#182;</a></h4><p>My second approach was finding features having correlation with poi higher than a certain limit, and other features that have a correlation higher than this certain limit with those that have this correlation with poi, and so forth until a depth value. I first used a depth of 1, since my initial correlation test showed that there are &gt;0.9 correlations. However, after careful inspection, I found out, these high correlations were due to too many missing values. Therefore, I rerun the correlation routine after predicting missing values, which gave me sub 0.4 correlations. Finally I decided to use correlation limit of 0.35 with the depth value of 2. In addition to these features, I also included new features I created in the prior step.</p>
+<p><img src="correlations.png" alt="Correlations Table"></p>
+<p>Here is the full feature set I managed to get at the end of this process:</p>
+
+<pre><code>feature_list = [
+    'poi',
+    'exercised_stock_options',
+    'total_stock_value',
+    'salary',
+    'total_payments',
+    'bonus',
+    'restricted_stock',
+    'loan_advances',
+    'other',
+    'long_term_incentive',
+    'restricted_stock_deferred',
+    'to_messages',
+    'shared_receipt_with_poi',
+    'from_this_person_to_poi',
+    'from_poi_to_this_person'
+]
+
+</code></pre>
+<h4 id="Weights-for-Correlation-Feature-Selection:">Weights for Correlation Feature Selection:<a class="anchor-link" href="#Weights-for-Correlation-Feature-Selection:">&#182;</a></h4><table>
+<thead><tr>
+<th>Parameter</th>
+<th>Weight</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>to_poi_ratio</td>
+<td>0.278</td>
+</tr>
+<tr>
+<td>total_stock_value</td>
+<td>0.217</td>
+</tr>
+<tr>
+<td>from_poi_to_this_person</td>
+<td>0.146</td>
+</tr>
+<tr>
+<td>total_payments</td>
+<td>0.089</td>
+</tr>
+<tr>
+<td>bonus</td>
+<td>0.073</td>
+</tr>
+<tr>
+<td>to_messages</td>
+<td>0.068</td>
+</tr>
+<tr>
+<td>shared_receipt_with_poi</td>
+<td>0.064</td>
+</tr>
+<tr>
+<td>restricted_stock</td>
+<td>0.061</td>
+</tr>
+</tbody>
+</table>
+<p>Seem like most of variables like <em>restricted_stock_deferred</em>, <em>loan_advances</em> did not effect the classification and contributed no meaningful info.</p>
 
 </div>
 </div>
@@ -11875,30 +12000,30 @@ div#notebook {
 <tr>
 <td>GaussianNB</td>
 <td>0.886</td>
-<td>0.33</td>
-<td>0.25</td>
-<td>0.286</td>
+<td>0.333</td>
+<td>0.249</td>
+<td>0.285</td>
 <td>0.263</td>
 </tr>
 <tr>
 <td>Linear Regression</td>
-<td>0.864</td>
-<td>0.25</td>
-<td>0.25</td>
-<td>0.25</td>
-<td>0.25</td>
+<td>0.863</td>
+<td>0.249</td>
+<td>0.249</td>
+<td>0.249</td>
+<td>0.249</td>
 </tr>
 <tr>
 <td>Lasso</td>
-<td>0.8636363636363636</td>
-<td>0.25</td>
-<td>0.25</td>
-<td>0.25</td>
-<td>0.25</td>
+<td>0.863</td>
+<td>0.249</td>
+<td>0.249</td>
+<td>0.249</td>
+<td>0.249</td>
 </tr>
 <tr>
 <td>SVC</td>
-<td>0.9090909090909091</td>
+<td>0.909</td>
 <td>0.0</td>
 <td>0.0</td>
 <td>0.0</td>
@@ -11906,19 +12031,80 @@ div#notebook {
 </tr>
 <tr>
 <td>DecisionTreeClassifier</td>
-<td>0.841</td>
-<td>0.2</td>
-<td>0.25</td>
-<td>0.22</td>
-<td>0.238</td>
+<td>0.863</td>
+<td>0.249</td>
+<td>0.249</td>
+<td>0.249</td>
+<td>0.249</td>
 </tr>
 <tr>
 <td>RandomForestClassifier</td>
-<td>0.932</td>
-<td>1.0</td>
-<td>0.25</td>
-<td>0.4</td>
+<td>0.931</td>
+<td>0.999</td>
+<td>0.249</td>
+<td>0.399</td>
 <td>0.294</td>
+</tr>
+</tbody>
+</table>
+<h4 id="Full-Feature-Set-Results-+-New-Features:">Full Feature Set Results + New Features:<a class="anchor-link" href="#Full-Feature-Set-Results-+-New-Features:">&#182;</a></h4><table>
+<thead><tr>
+<th>Classifier</th>
+<th>Accuracy</th>
+<th>Precision</th>
+<th>Recall</th>
+<th>F1 Score</th>
+<th>F2 Score</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GaussianNB</td>
+<td>0.886</td>
+<td>0.333</td>
+<td>0.249</td>
+<td>0.285</td>
+<td>0.263</td>
+</tr>
+<tr>
+<td>Linear Regression</td>
+<td>0.863</td>
+<td>0.249</td>
+<td>0.249</td>
+<td>0.249</td>
+<td>0.249</td>
+</tr>
+<tr>
+<td>Lasso</td>
+<td>0.863</td>
+<td>0.249</td>
+<td>0.249</td>
+<td>0.249</td>
+<td>0.249</td>
+</tr>
+<tr>
+<td>SVC</td>
+<td>0.909</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>0.0</td>
+</tr>
+<tr>
+<td>DecisionTreeClassifier</td>
+<td>0.863</td>
+<td>0.374</td>
+<td>0.749</td>
+<td>0.499</td>
+<td>0.624</td>
+</tr>
+<tr>
+<td>RandomForestClassifier</td>
+<td>0.931</td>
+<td>0.666</td>
+<td>0.499</td>
+<td>0.571</td>
+<td>0.526</td>
 </tr>
 </tbody>
 </table>
@@ -11935,31 +12121,31 @@ div#notebook {
 <tbody>
 <tr>
 <td>GaussianNB</td>
-<td>0.886</td>
-<td>0.4</td>
-<td>0.5</td>
-<td>0.444</td>
-<td>0.476</td>
+<td>0.863</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>0.0</td>
 </tr>
 <tr>
 <td>Linear Regression</td>
-<td>0.91</td>
-<td>0.5</td>
-<td>0.25</td>
-<td>0.333</td>
-<td>0.278</td>
+<td>0.886</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>0.0</td>
 </tr>
 <tr>
 <td>Lasso</td>
-<td>0.91</td>
-<td>0.5</td>
-<td>0.25</td>
-<td>0.333</td>
-<td>0.278</td>
+<td>0.886</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>0.0</td>
 </tr>
 <tr>
 <td>SVC</td>
-<td>0.91</td>
+<td>0.909</td>
 <td>0.0</td>
 <td>0.0</td>
 <td>0.0</td>
@@ -11967,23 +12153,29 @@ div#notebook {
 </tr>
 <tr>
 <td>DecisionTreeClassifier</td>
-<td>0.886</td>
-<td>0.4</td>
-<td>0.5</td>
-<td>0.444</td>
-<td>0.476</td>
+<td>0.909</td>
+<td>0.499</td>
+<td>0.749</td>
+<td>0.599</td>
+<td>0.681</td>
 </tr>
 <tr>
 <td>RandomForestClassifier</td>
-<td>0.864</td>
-<td>0.0</td>
-<td>0.0</td>
-<td>0.0</td>
-<td>0.0</td>
+<td>0.931</td>
+<td>0.999</td>
+<td>0.249</td>
+<td>0.399</td>
+<td>0.294</td>
 </tr>
 </tbody>
 </table>
-<h4 id="Correlation-(depth-=-1)-Results:">Correlation (depth = 1) Results:<a class="anchor-link" href="#Correlation-(depth-=-1)-Results:">&#182;</a></h4><table>
+<p><strong>Tester.py Scores for DecisionTreeClassifier:</strong></p>
+<ul>
+<li>Accuracy: 0.85133    </li>
+<li>Precision: 0.43804    </li>
+<li>Recall: 0.40650</li>
+</ul>
+<h4 id="Correlation-(Depth-=-2)-Results:">Correlation (Depth = 2) Results:<a class="anchor-link" href="#Correlation-(Depth-=-2)-Results:">&#182;</a></h4><table>
 <thead><tr>
 <th>Classifier</th>
 <th>Accuracy</th>
@@ -11996,31 +12188,31 @@ div#notebook {
 <tbody>
 <tr>
 <td>GaussianNB</td>
-<td>0.864</td>
-<td>0.25</td>
-<td>0.25</td>
-<td>0.25</td>
-<td>0.25</td>
+<td>0.863</td>
+<td>0.249</td>
+<td>0.249</td>
+<td>0.249</td>
+<td>0.249</td>
 </tr>
 <tr>
 <td>Linear Regression</td>
-<td>0.886</td>
-<td>0.333</td>
-<td>0.25</td>
-<td>0.2865</td>
-<td>0.263</td>
+<td>0.863</td>
+<td>0.249</td>
+<td>0.249</td>
+<td>0.249</td>
+<td>0.249</td>
 </tr>
 <tr>
 <td>Lasso</td>
-<td>0.91</td>
-<td>0.5</td>
-<td>0.25</td>
-<td>0.333</td>
-<td>0.278</td>
+<td>0.84</td>
+<td>0.199</td>
+<td>0.249</td>
+<td>0.222</td>
+<td>0.238</td>
 </tr>
 <tr>
 <td>SVC</td>
-<td>0.91</td>
+<td>0.909</td>
 <td>0.0</td>
 <td>0.0</td>
 <td>0.0</td>
@@ -12028,19 +12220,19 @@ div#notebook {
 </tr>
 <tr>
 <td>DecisionTreeClassifier</td>
-<td>0.91</td>
-<td>0.5</td>
-<td>1.0</td>
-<td>0.67</td>
-<td>0.833</td>
+<td>0.909</td>
+<td>0.499</td>
+<td>0.749</td>
+<td>0.599</td>
+<td>0.681</td>
 </tr>
 <tr>
 <td>RandomForestClassifier</td>
-<td>0.977</td>
-<td>1.0</td>
-<td>0.75</td>
-<td>0.857</td>
-<td>0.789</td>
+<td>0.909</td>
+<td>0.499</td>
+<td>0.249</td>
+<td>0.333</td>
+<td>0.277</td>
 </tr>
 </tbody>
 </table>
@@ -12053,7 +12245,7 @@ div#notebook {
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p><strong>Correlation @ Depth = 1</strong> gave best results with highest Recall score of DecisionTreeClassifier (100%) and highest Precision of RandomForestClassifier (100%).</p>
+<p><strong>DecisionTreeClassifier w/ Weights Feature Selector</strong> gave best results with highest Recall score of DecisionTreeClassifier (75%%) and highest Precision of RandomForestClassifier (100%).</p>
 <p>Since finding all POIs is more important than precisely finding correct POIs, the primary score is Recall. Therefore, I decided to go with <strong>DecisionTreeClassifier</strong>.</p>
 
 </div>
@@ -12126,7 +12318,7 @@ div#notebook {
 <div class="text_cell_render border-box-sizing rendered_html">
 <p>At the end of parameter tuning I decided to go with <strong>DecisionTreeClassifier</strong>. The best parameters found with this classifier are as below:</p>
 
-<pre><code>DecisionTreeClassifier(criterion='gini', min_samples_leaf=5, min_samples_split=2)</code></pre>
+<pre><code>DecisionTreeClassifier(criterion='gini', min_samples_leaf=1, min_samples_split=2)</code></pre>
 
 </div>
 </div>
@@ -12147,9 +12339,11 @@ div#notebook {
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Validation is testing the classifier / model built for the purpose or classifying new data. To do this, original data should be split into two groups: <strong>train</strong> and <strong>test</strong></p>
+<p>Validation is testing the classifier / model built for the purpose or classifying new data. To do this, original data should be split into two groups; namely, <strong>train</strong> and <strong>test</strong>. Splitting data in this way helps to evaluate the classifier with a dataset, the model never seen until this point. Thereby, we can make sure the evaluation does inded reflect unbiased results.</p>
+<p>If we dont split dataset, the validation will be made with the same data the classifier is fitted/trained. In this case we will be asking classifier to classify data that it already know very well. This, will lean unrealistic scores. And even if classifier is overfit, we will no way of knowing.</p>
 <p>Train data is used to build model/classifier. Test data is used to validate if the model behaves as expected. Test data is expected to be completely new to the classifier at the time testing. Test data can also be split into validation and test for bling testing. But in this project we only split data into train and test.</p>
-<p>In model building stage of this project we also split data into train and test. We first fitted out classifiers with train dataset. Later on we evaluated our classifiers based on test data.</p>
+<p>However, Enron Dataset has asymmetry in terms of POI / non-POI ratio. This may lead to shuffle splits leading to different rations of POI/non-POI in train and test subsets. In cases like this stratification is used. K-fold cross-validation is a common approach used with stratification. Stratification is simply puts POIs and non-POIs into subsets with the ratio entire dataset has.</p>
+<p>However in model building stage of this project we only used shuffle split with train and test subsets. We first fitted out classifiers with train dataset. Later on we evaluated our classifiers based on test data.</p>
 <p>However this type of evaluation is not deterministic enough. To get results better evaluating classifier n-fold validation is used. In this method, data is reshuffled n times and tested with split results for each fold. Overall results are then combined.</p>
 
 </div>
@@ -12178,18 +12372,16 @@ div#notebook {
 <h4 id="Using-Train-&amp;-Test-Split:">Using Train &amp; Test Split:<a class="anchor-link" href="#Using-Train-&amp;-Test-Split:">&#182;</a></h4><ul>
 <li><p>Accuracy: <strong>0.91</strong></p>
 </li>
-<li><p>Recall: <strong>1.0</strong></p>
+<li><p>Recall: <strong>0.5</strong></p>
 </li>
-<li><p>Precision: <strong>0.5</strong></p>
+<li><p>Precision: <strong>0.75</strong></p>
 </li>
 </ul>
-<h4 id="Using-Final-Testing-Script-(Cross-Validation:-cv-=-1000):">Using Final Testing Script (Cross-Validation: cv = 1000):<a class="anchor-link" href="#Using-Final-Testing-Script-(Cross-Validation:-cv-=-1000):">&#182;</a></h4><ul>
-<li><p>Accuracy: <strong>0.85860</strong></p>
-</li>
-<li><p>Recall: <strong>0.39800</strong></p>
-</li>
-<li><p>Precision: <strong>0.46468</strong></p>
-</li>
+<p>While validating my classifiers I only user train-test split. However, tester script provided with the project evaluates the model with k-fold cross-validation. Evaluation results with this scripts are as follows:</p>
+<h4 id="Using-Project-Testing-Script-/-tester.py-(Cross-Validation:-1000):">Using Project Testing Script / tester.py (Cross-Validation: 1000):<a class="anchor-link" href="#Using-Project-Testing-Script-/-tester.py-(Cross-Validation:-1000):">&#182;</a></h4><ul>
+<li>Accuracy: <strong>0.86</strong>    </li>
+<li>Precision: <strong>0.46</strong>    </li>
+<li>Recall: <strong>0.36</strong></li>
 </ul>
 <p>The difference between my results and CV results is mostly due to train-test split being in favor my results, which shows how cross validation can help better evaluate a classifier.</p>
 

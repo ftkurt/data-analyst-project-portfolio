@@ -1,6 +1,7 @@
 #!/usr/bin/python
 import numpy as np
 import pandas as pd
+from operator import itemgetter
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.tree import DecisionTreeClassifier
@@ -14,6 +15,18 @@ sys.path.append("../tools/")
 
 from feature_format import featureFormat, targetFeatureSplit
 from tester import dump_classifier_and_data
+
+def format_float(x):
+    return int(x*1000.0)/1000.0
+
+def pandas_df_to_markdown_table(df):
+    from IPython.display import Markdown, display
+    fmt = ['---' for i in range(len(df.columns))]
+    df_fmt = pd.DataFrame([fmt], columns=df.columns)
+    cols = df.columns.values.tolist()[1:]
+    df[cols] = df[cols].applymap(format_float)
+    df_formatted = pd.concat([df_fmt, df])
+    print(df_formatted.to_csv(sep="|", index=False, decimal='', float_format='%.3f'))
 
 ### Task 1: Select what features you'll use.
 ### features_list is a list of strings, each of which is a feature name.
@@ -29,6 +42,7 @@ for k,v in data_dict['METTS MARK'].iteritems():
 
 ### Task 2: Remove outliers
 del data_dict['TOTAL']
+del data_dict["LOCKHART EUGENE E"]
 
 df = pd.DataFrame(data_dict).transpose()[features_list]
 df = df.replace('NaN', np.nan, regex=True)
@@ -36,34 +50,7 @@ def is_NaN(x):
     return x == 'NaN'
 df.head(3)
 df[features_list[1:]].describe()
-corr = df.corr()
 
-def map_(x):
-    if abs(x)==1:
-        return 0
-    elif abs(x)>0.9:
-        return x
-    return 0
-plt.figure(figsize=(12, 10))
-sns.heatmap(abs(corr.applymap(map_)), 
-            xticklabels=corr.columns.values,
-            yticklabels=corr.columns.values)
-
-def extract_parameters_by_correlation(corr, min_corr, depth, selections):
-    features = corr.columns.values.tolist()
-    new_selections = []
-    for sel in selections:
-        for f in features:
-            if (sel != f) and (f not in selections+new_selections) and (f in corr) and (abs(corr[sel][f]) > min_corr):
-                new_selections.append(f)
-    selections = selections+new_selections
-    if depth < 1:
-        return selections
-    else:
-        return extract_parameters_by_correlation(corr, min_corr, depth-1, selections)
-
-primary_components = extract_parameters_by_correlation(corr, 0.9,1, ["poi"])
-primary_components
 
 
 ### Task 3: Create new feature(s)
@@ -100,17 +87,57 @@ for column in df.columns.values.tolist():
     if column != "poi":
         predict_na_values(df, column)
 
+corr_limit = 0.35
+corr = df.corr()
 
+def map_(x):
+    if abs(x)==1:
+        return 0
+    elif abs(x)>corr_limit:
+        return int(100.0*x)
+    return 0
+plt.figure(figsize=(12, 10))
+sns.heatmap(abs(corr.applymap(map_)), 
+            xticklabels=corr.columns.values,
+            yticklabels=corr.columns.values)
+
+def extract_parameters_by_correlation(corr, min_corr, depth, selections):
+    features = corr.columns.values.tolist()
+    new_selections = []
+    for sel in selections:
+        for f in features:
+            if (sel != f) and (f not in selections+new_selections) and (f in corr) and (abs(corr[sel][f]) > min_corr):
+                new_selections.append(f)
+    selections = selections+new_selections
+    if depth < 1:
+        return selections
+    else:
+        return extract_parameters_by_correlation(corr, min_corr, depth-1, selections)
+
+primary_components = extract_parameters_by_correlation(corr, corr_limit, 2, ["poi"])
+primary_components
+        
 # Create new feaures
 df['from_poi_ratio'] = df['from_poi_to_this_person']/df['to_messages']
 df['to_poi_ratio'] = df['from_this_person_to_poi']/df['from_messages']
 
-my_dataset = df.to_dict(orient='index')
-final_feature_list = primary_components+['from_poi_ratio','to_poi_ratio']
-#final_feature_list = features_list + ['from_poi_ratio', 'to_poi_ratio']
+selected_list = [
+    "poi",
+    "to_poi_ratio",
+    "expenses",
+    "shared_receipt_with_poi",
+    "restricted_stock",
+    "restricted_stock_deferred",
+    "deferral_payments",
+    "other"]
 
+my_dataset = df.to_dict(orient='index')
+#final_feature_list = primary_components
+#final_feature_list = primary_components+['from_poi_ratio','to_poi_ratio']
+#final_feature_list = features_list + ['from_poi_ratio', 'to_poi_ratio']
+#final_feature_list = features_list
 ## parameters weigths extracted from full set
-#final_feature_list = ["poi","from_poi_ratio","total_stock_value","bonus","shared_receipt_with_poi","to_messages","restricted_stock"]
+final_feature_list = selected_list
 ### Extract features and labels from dataset for local testing
 data = featureFormat(my_dataset, final_feature_list, sort_keys = True)
 labels, features = targetFeatureSplit(data)
