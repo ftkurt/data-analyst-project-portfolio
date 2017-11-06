@@ -55,6 +55,10 @@ df[features_list[1:]].describe()
 
 ### Task 3: Create new feature(s)
 ### Store to my_dataset for easy export below.
+
+# Before starting to calculate new features, I want to fill NaN values with a predictor. 
+# Below functions will create a GaussianNB classifier to predict missing values with respect to other data points. 
+
 # remove NaNs from train data:
 def clean_train_data(features):
     for line in features:
@@ -87,6 +91,28 @@ for column in df.columns.values.tolist():
     if column != "poi":
         predict_na_values(df, column)
 
+
+        
+# List of new created features
+df['from_poi_ratio'] = df['from_poi_to_this_person']/df['to_messages']
+df['to_poi_ratio'] = df['from_this_person_to_poi']/df['from_messages']
+
+
+# Parameter selections:
+
+# Parameters selected by weigths acquired from TreeClassifier
+selected_list = [
+    "poi",
+    "to_poi_ratio",
+    "expenses",
+    "shared_receipt_with_poi",
+    "restricted_stock",
+    "restricted_stock_deferred",
+    "deferral_payments",
+    "other"]
+
+# Below code will select parameters based on their correlations with poi:
+
 corr_limit = 0.35
 corr = df.corr()
 
@@ -114,22 +140,9 @@ def extract_parameters_by_correlation(corr, min_corr, depth, selections):
     else:
         return extract_parameters_by_correlation(corr, min_corr, depth-1, selections)
 
+# primary_components are parameters which have correlation with poi or corelation with those that have correlation with poi: 
 primary_components = extract_parameters_by_correlation(corr, corr_limit, 2, ["poi"])
 primary_components
-        
-# Create new feaures
-df['from_poi_ratio'] = df['from_poi_to_this_person']/df['to_messages']
-df['to_poi_ratio'] = df['from_this_person_to_poi']/df['from_messages']
-
-selected_list = [
-    "poi",
-    "to_poi_ratio",
-    "expenses",
-    "shared_receipt_with_poi",
-    "restricted_stock",
-    "restricted_stock_deferred",
-    "deferral_payments",
-    "other"]
 
 my_dataset = df.to_dict(orient='index')
 #final_feature_list = primary_components
@@ -137,6 +150,8 @@ my_dataset = df.to_dict(orient='index')
 #final_feature_list = features_list + ['from_poi_ratio', 'to_poi_ratio']
 #final_feature_list = features_list
 ## parameters weigths extracted from full set
+
+# I tried above lists, but Parameters selected by weigths acquired from TreeClassifier provided best results
 final_feature_list = selected_list
 ### Extract features and labels from dataset for local testing
 data = featureFormat(my_dataset, final_feature_list, sort_keys = True)
