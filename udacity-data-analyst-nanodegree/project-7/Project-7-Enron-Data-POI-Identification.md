@@ -178,7 +178,9 @@ RandomForestClassifier|0.909|0.499|0.249|0.333|0.277
 # Question 4
 > What does it mean to tune the parameters of an algorithm, and what can happen if you don’t do this well?  How did you tune the parameters of your particular algorithm? What parameters did you tune? (Some algorithms do not have parameters that you need to tune -- if this is the case for the one you picked, identify and briefly explain how you would have done it for the model that was not your final choice or a different model that does utilize parameter tuning, e.g. a decision tree classifier).  [relevant rubric items: “discuss parameter tuning”, “tune the algorithm”]
 
-Classifiers have a lot of parameters in order to decide their behaviors with fitting data and classifiying input. Each data will need different set of parameter values to classify input the most efficiently. Parameter tuning is trying to find this best parameters or getting close enough.
+Classifiers have a lot of parameters in order to decide their behaviors with fitting data and classifiying input. Each data will need different set of parameter values to classify input the most efficiently. Parameter tuning is trying to find these best parameters or getting close enough. 
+
+Parameter fine tuning is essential in a sense that when igoned an otherwise very successful model could prove futile. A fined-tuned model would in theory produce much better results. Therefore, when performed, parameter tuning will ensure that at least we are using a parameter set closer to the ideal than a random parameter set.
 
 For this project I went through list of parameters available for tuning for each classifier. Each classifier is then wrapped with GridSearch alongside with this parameter ranges. Gridsearch, then tries all combinations of these parameter valu lists, and returns the best predictor configuration.
 
