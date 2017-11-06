@@ -102,14 +102,20 @@ df['to_poi_ratio'] = df['from_this_person_to_poi']/df['from_messages']
 
 # Parameters selected by weigths acquired from TreeClassifier
 selected_list = [
-    "poi",
-    "to_poi_ratio",
-    "expenses",
-    "shared_receipt_with_poi",
-    "restricted_stock",
-    "restricted_stock_deferred",
-    "deferral_payments",
-    "other"]
+    'poi',
+    'to_poi_ratio',
+    'from_poi_to_this_person',
+    'shared_receipt_with_poi',
+    'restricted_stock_deferred',
+    'expenses',
+    'deferral_payments',
+    'from_poi_ratio',
+    'salary',
+    'to_messages',
+    'total_payments',
+    'exercised_stock_options',
+    'bonus'
+]
 
 # Below code will select parameters based on their correlations with poi:
 
@@ -143,6 +149,22 @@ def extract_parameters_by_correlation(corr, min_corr, depth, selections):
 # primary_components are parameters which have correlation with poi or corelation with those that have correlation with poi: 
 primary_components = extract_parameters_by_correlation(corr, corr_limit, 2, ["poi"])
 primary_components
+
+# Feature disposer to find optimal number of features (sorted by weights): 
+def test_different_combinations(feature_list,results):
+    feature_list = feature_list[:-1]
+    data = featureFormat(my_dataset, ["poi"]+feature_list, sort_keys = True)
+    labels, features = targetFeatureSplit(data)
+    features_train, features_test, labels_train, labels_test = \
+        train_test_split(features, labels, test_size=0.3, random_state=42)
+    clf = DecisionTreeClassifier(criterion='gini', min_samples_leaf=1, min_samples_split=2)
+    clf.fit(features_train,labels_train)
+    y_pred = clf.predict(features_test)
+    accuracy, precision, recall, f1, f2 = get_scores(y_pred,labels_test)
+    results.append([len(feature_list),accuracy, precision, recall, f1, f2])
+    if len(feature_list)>3:
+        test_different_combinations(feature_list,results)
+    return results
 
 my_dataset = df.to_dict(orient='index')
 #final_feature_list = primary_components

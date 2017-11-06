@@ -43,6 +43,25 @@ deferral_payments|0.093
 other|0.055
 
 
+#### Finalization or Feature Selection Based on Weights
+
+In order to finalize the feature selection, I employed a gradual feature disposer which tests performance of each subset of features. The gradual feature disposer, showed increasing performance in Accuracy until the feature list is as below: 
+
+    feature_list = [
+        'to_poi_ratio',
+        'from_poi_to_this_person',
+        'shared_receipt_with_poi',
+        'restricted_stock_deferred',
+        'expenses',
+        'deferral_payments',
+        'from_poi_ratio',
+        'salary',
+        'to_messages',
+        'total_payments',
+        'exercised_stock_options',
+        'bonus'
+    ]
+
 #### New Features and Their Contribution to the Classification:
 **from_poi_ratio:** ratio of mails received from POIs
 
@@ -95,7 +114,7 @@ Seem like most of variables like *restricted_stock_deferred*, *loan_advances* di
 
 I decided to try all classifiers including linear models with an added rounding layer. From Linear models GaussianNB, and Linear Regression, the predictors are used without parameter tuning, since they dont have parameter tuning. For Lasso and other regular classifiers, I used a set of parameters with Grid Search. All scores listed below belong to best parameter combinations.
 
-#### Full Feature Set Results:
+#### Trial-1: Full Feature Set Results:
 
 Classifier|Accuracy|Precision|Recall|F1 Score|F2 Score
 ---|---|---|---|---|---
@@ -105,8 +124,8 @@ Lasso|0.863|0.249|0.249|0.249|0.249
 SVC|0.909|0.0|0.0|0.0|0.0
 DecisionTreeClassifier|0.863|0.249|0.249|0.249|0.249
 RandomForestClassifier|0.931|0.999|0.249|0.399|0.294
-
-#### Full Feature Set Results + New Features:
+__________
+#### Trial-2: Full Feature Set Results + New Features:
 
 Classifier|Accuracy|Precision|Recall|F1 Score|F2 Score
 ---|---|---|---|---|---
@@ -116,25 +135,25 @@ Lasso|0.863|0.249|0.249|0.249|0.249
 SVC|0.909|0.0|0.0|0.0|0.0
 DecisionTreeClassifier|0.863|0.374|0.749|0.499|0.624
 RandomForestClassifier|0.931|0.666|0.499|0.571|0.526
-
-#### DecisionTreeClassifier Weights Feature Selector
+______________
+#### Trial-3: DecisionTreeClassifier Weights Feature Selector <span style="color:red;">(Choosen Approach upon Results)</span>
 
 Classifier|Accuracy|Precision|Recall|F1 Score|F2 Score
 ---|---|---|---|---|---
-GaussianNB|0.863|0.0|0.0|0.0|0.0
-Linear Regression|0.886|0.0|0.0|0.0|0.0
-Lasso|0.886|0.0|0.0|0.0|0.0
-SVC|0.909|0.0|0.0|0.0|0.0
-DecisionTreeClassifier|0.909|0.499|0.749|0.599|0.681
-RandomForestClassifier|0.931|0.999|0.249|0.399|0.294
+GaussianNB|0.886|0.499|0.599|0.545|0.576
+Linear Regression|0.909|0.666|0.399|0.499|0.434
+Lasso|0.909|0.666|0.399|0.499|0.434
+SVC|0.886|0.0|0.0|0.0|0.0
+DecisionTreeClassifier|0.909|0.666|0.399|0.499|0.434
+RandomForestClassifier|0.886|0.0|0.0|0.0|0.0
 
 **Tester.py Scores for DecisionTreeClassifier:**
 
-* Accuracy: 0.85133	
-* Precision: 0.43804	
-* Recall: 0.40650
-
-#### Correlation (Depth = 2) Results:
+* Accuracy: 0.85967	
+* Precision: 0.46436	
+* Recall: 0.34200
+_________________
+#### Trial-4: Correlation (Depth = 2, Correlation Limit = 0.35) Results:
 
 Classifier|Accuracy|Precision|Recall|F1 Score|F2 Score
 ---|---|---|---|---|---
@@ -145,10 +164,16 @@ SVC|0.909|0.0|0.0|0.0|0.0
 DecisionTreeClassifier|0.909|0.499|0.749|0.599|0.681
 RandomForestClassifier|0.909|0.499|0.249|0.333|0.277
 
+* Since this approach yielded no meaningful results upon earlier results, I decided not to do further tests with different Depths and Correlation limits. 
 
-**DecisionTreeClassifier w/ Weights Feature Selector** gave best results with highest Recall score of DecisionTreeClassifier (75%%) and highest Precision of RandomForestClassifier (100%). 
 
-Since finding all POIs is more important than precisely finding correct POIs, the primary score is Recall. Therefore, I decided to go with **DecisionTreeClassifier**.
+## Results for Classifier and Feature Set
+
+* The best scores belong to **Trial-3: DecisionTreeClassifier Weights Feature Selector**; therefore, we decided to do our tests with feature set used for this trial. 
+
+* **DecisionTreeClassifier w/ Weights Feature Selector** gave best results with highest Recall score of DecisionTreeClassifier (75%) and highest Precision of RandomForestClassifier (100%). 
+
+* Since finding all POIs is more important than precisely finding correct POIs, the primary score is Recall. Therefore, I decided to go with **DecisionTreeClassifier**.
 
 # Question 4
 > What does it mean to tune the parameters of an algorithm, and what can happen if you don’t do this well?  How did you tune the parameters of your particular algorithm? What parameters did you tune? (Some algorithms do not have parameters that you need to tune -- if this is the case for the one you picked, identify and briefly explain how you would have done it for the model that was not your final choice or a different model that does utilize parameter tuning, e.g. a decision tree classifier).  [relevant rubric items: “discuss parameter tuning”, “tune the algorithm”]
@@ -200,7 +225,7 @@ If we dont split dataset, the validation will be made with the same data the cla
 
 Train data is used to build model/classifier. Test data is used to validate if the model behaves as expected. Test data is expected to be completely new to the classifier at the time testing. Test data can also be split into validation and test for bling testing. But in this project we only split data into train and test.
 
-However, Enron Dataset has asymmetry in terms of POI / non-POI ratio. This may lead to shuffle splits leading to different rations of POI/non-POI in train and test subsets. In cases like this stratification is used. K-fold cross-validation is a common approach used with stratification. Stratification is simply puts POIs and non-POIs into subsets with the ratio entire dataset has.
+However, Enron Dataset has asymmetry in terms of POI / non-POI ratio. This may lead to shuffle splits leading to different rations of POI/non-POI in train and test subsets. In cases like this stratification can be used. K-fold cross-validation is a common approach used with stratification. Stratification is simply puts POIs and non-POIs into subsets with the ratio entire dataset has. However, in this project, we did not use stratification. Instead we used basic shuffle split.
 
 However in model building stage of this project we only used shuffle split with train and test subsets. We first fitted out classifiers with train dataset. Later on we evaluated our classifiers based on test data. 
 

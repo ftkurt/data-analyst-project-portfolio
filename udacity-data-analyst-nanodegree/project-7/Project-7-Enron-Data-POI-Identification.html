@@ -11888,6 +11888,31 @@ div#notebook {
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
+<h4 id="Finalization-or-Feature-Selection-Based-on-Weights">Finalization or Feature Selection Based on Weights<a class="anchor-link" href="#Finalization-or-Feature-Selection-Based-on-Weights">&#182;</a></h4><p>In order to finalize the feature selection, I employed a gradual feature disposer which tests performance of each subset of features. The gradual feature disposer, showed increasing performance in Accuracy until the feature list is as below:</p>
+
+<pre><code>feature_list = [
+    'to_poi_ratio',
+    'from_poi_to_this_person',
+    'shared_receipt_with_poi',
+    'restricted_stock_deferred',
+    'expenses',
+    'deferral_payments',
+    'from_poi_ratio',
+    'salary',
+    'to_messages',
+    'total_payments',
+    'exercised_stock_options',
+    'bonus'
+]</code></pre>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
 <h4 id="New-Features-and-Their-Contribution-to-the-Classification:">New Features and Their Contribution to the Classification:<a class="anchor-link" href="#New-Features-and-Their-Contribution-to-the-Classification:">&#182;</a></h4><p><strong>from_poi_ratio:</strong> ratio of mails received from POIs</p>
 <p><strong>to_poi_ratio:</strong> ratio of mail sent to POIs</p>
 <p>From first run with full feature list, I concluded that <em>from_poi_ratio</em> contributed to the classification better than any other variable with a weight of 0.28. However, <em>to_poi_ratio</em> seems to be contribution no meaningfull information. On the other hand, addition of these new features changed weights of other parameters. Most notably, <em>from_poi_to_this_person</em> is down to out of list from top position with 0.29.</p>
@@ -11986,7 +12011,7 @@ div#notebook {
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h4 id="Full-Feature-Set-Results:">Full Feature Set Results:<a class="anchor-link" href="#Full-Feature-Set-Results:">&#182;</a></h4><table>
+<h4 id="Trial-1:-Full-Feature-Set-Results:">Trial-1: Full Feature Set Results:<a class="anchor-link" href="#Trial-1:-Full-Feature-Set-Results:">&#182;</a></h4><table>
 <thead><tr>
 <th>Classifier</th>
 <th>Accuracy</th>
@@ -12047,7 +12072,8 @@ div#notebook {
 </tr>
 </tbody>
 </table>
-<h4 id="Full-Feature-Set-Results-+-New-Features:">Full Feature Set Results + New Features:<a class="anchor-link" href="#Full-Feature-Set-Results-+-New-Features:">&#182;</a></h4><table>
+<hr>
+<h4 id="Trial-2:-Full-Feature-Set-Results-+-New-Features:">Trial-2: Full Feature Set Results + New Features:<a class="anchor-link" href="#Trial-2:-Full-Feature-Set-Results-+-New-Features:">&#182;</a></h4><table>
 <thead><tr>
 <th>Classifier</th>
 <th>Accuracy</th>
@@ -12108,7 +12134,8 @@ div#notebook {
 </tr>
 </tbody>
 </table>
-<h4 id="DecisionTreeClassifier-Weights-Feature-Selector">DecisionTreeClassifier Weights Feature Selector<a class="anchor-link" href="#DecisionTreeClassifier-Weights-Feature-Selector">&#182;</a></h4><table>
+<hr>
+<h4 id="Trial-3:-DecisionTreeClassifier-Weights-Feature-Selector-(Choosen-Approach-upon-Results)">Trial-3: DecisionTreeClassifier Weights Feature Selector <span style="color:red;">(Choosen Approach upon Results)</span><a class="anchor-link" href="#Trial-3:-DecisionTreeClassifier-Weights-Feature-Selector-(Choosen-Approach-upon-Results)">&#182;</a></h4><table>
 <thead><tr>
 <th>Classifier</th>
 <th>Accuracy</th>
@@ -12121,31 +12148,31 @@ div#notebook {
 <tbody>
 <tr>
 <td>GaussianNB</td>
-<td>0.863</td>
-<td>0.0</td>
-<td>0.0</td>
-<td>0.0</td>
-<td>0.0</td>
+<td>0.886</td>
+<td>0.499</td>
+<td>0.599</td>
+<td>0.545</td>
+<td>0.576</td>
 </tr>
 <tr>
 <td>Linear Regression</td>
-<td>0.886</td>
-<td>0.0</td>
-<td>0.0</td>
-<td>0.0</td>
-<td>0.0</td>
+<td>0.909</td>
+<td>0.666</td>
+<td>0.399</td>
+<td>0.499</td>
+<td>0.434</td>
 </tr>
 <tr>
 <td>Lasso</td>
-<td>0.886</td>
-<td>0.0</td>
-<td>0.0</td>
-<td>0.0</td>
-<td>0.0</td>
+<td>0.909</td>
+<td>0.666</td>
+<td>0.399</td>
+<td>0.499</td>
+<td>0.434</td>
 </tr>
 <tr>
 <td>SVC</td>
-<td>0.909</td>
+<td>0.886</td>
 <td>0.0</td>
 <td>0.0</td>
 <td>0.0</td>
@@ -12154,28 +12181,29 @@ div#notebook {
 <tr>
 <td>DecisionTreeClassifier</td>
 <td>0.909</td>
+<td>0.666</td>
+<td>0.399</td>
 <td>0.499</td>
-<td>0.749</td>
-<td>0.599</td>
-<td>0.681</td>
+<td>0.434</td>
 </tr>
 <tr>
 <td>RandomForestClassifier</td>
-<td>0.931</td>
-<td>0.999</td>
-<td>0.249</td>
-<td>0.399</td>
-<td>0.294</td>
+<td>0.886</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>0.0</td>
 </tr>
 </tbody>
 </table>
 <p><strong>Tester.py Scores for DecisionTreeClassifier:</strong></p>
 <ul>
-<li>Accuracy: 0.85133    </li>
-<li>Precision: 0.43804    </li>
-<li>Recall: 0.40650</li>
+<li>Accuracy: 0.85967    </li>
+<li>Precision: 0.46436    </li>
+<li>Recall: 0.34200</li>
 </ul>
-<h4 id="Correlation-(Depth-=-2)-Results:">Correlation (Depth = 2) Results:<a class="anchor-link" href="#Correlation-(Depth-=-2)-Results:">&#182;</a></h4><table>
+<hr>
+<h4 id="Trial-4:-Correlation-(Depth-=-2,-Correlation-Limit-=-0.35)-Results:">Trial-4: Correlation (Depth = 2, Correlation Limit = 0.35) Results:<a class="anchor-link" href="#Trial-4:-Correlation-(Depth-=-2,-Correlation-Limit-=-0.35)-Results:">&#182;</a></h4><table>
 <thead><tr>
 <th>Classifier</th>
 <th>Accuracy</th>
@@ -12236,6 +12264,9 @@ div#notebook {
 </tr>
 </tbody>
 </table>
+<ul>
+<li>Since this approach yielded no meaningful results upon earlier results, I decided not to do further tests with different Depths and Correlation limits. </li>
+</ul>
 
 </div>
 </div>
@@ -12245,8 +12276,23 @@ div#notebook {
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p><strong>DecisionTreeClassifier w/ Weights Feature Selector</strong> gave best results with highest Recall score of DecisionTreeClassifier (75%%) and highest Precision of RandomForestClassifier (100%).</p>
-<p>Since finding all POIs is more important than precisely finding correct POIs, the primary score is Recall. Therefore, I decided to go with <strong>DecisionTreeClassifier</strong>.</p>
+<h2 id="Results-for-Classifier-and-Feature-Set">Results for Classifier and Feature Set<a class="anchor-link" href="#Results-for-Classifier-and-Feature-Set">&#182;</a></h2>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<ul>
+<li><p>The best scores belong to <strong>Trial-3: DecisionTreeClassifier Weights Feature Selector</strong>; therefore, we decided to do our tests with feature set used for this trial.</p>
+</li>
+<li><p><strong>DecisionTreeClassifier w/ Weights Feature Selector</strong> gave best results with highest Recall score of DecisionTreeClassifier (75%) and highest Precision of RandomForestClassifier (100%).</p>
+</li>
+<li><p>Since finding all POIs is more important than precisely finding correct POIs, the primary score is Recall. Therefore, I decided to go with <strong>DecisionTreeClassifier</strong>.</p>
+</li>
+</ul>
 
 </div>
 </div>
@@ -12342,7 +12388,7 @@ div#notebook {
 <p>Validation is testing the classifier / model built for the purpose or classifying new data. To do this, original data should be split into two groups; namely, <strong>train</strong> and <strong>test</strong>. Splitting data in this way helps to evaluate the classifier with a dataset, the model never seen until this point. Thereby, we can make sure the evaluation does inded reflect unbiased results.</p>
 <p>If we dont split dataset, the validation will be made with the same data the classifier is fitted/trained. In this case we will be asking classifier to classify data that it already know very well. This, will lean unrealistic scores. And even if classifier is overfit, we will no way of knowing.</p>
 <p>Train data is used to build model/classifier. Test data is used to validate if the model behaves as expected. Test data is expected to be completely new to the classifier at the time testing. Test data can also be split into validation and test for bling testing. But in this project we only split data into train and test.</p>
-<p>However, Enron Dataset has asymmetry in terms of POI / non-POI ratio. This may lead to shuffle splits leading to different rations of POI/non-POI in train and test subsets. In cases like this stratification is used. K-fold cross-validation is a common approach used with stratification. Stratification is simply puts POIs and non-POIs into subsets with the ratio entire dataset has.</p>
+<p>However, Enron Dataset has asymmetry in terms of POI / non-POI ratio. This may lead to shuffle splits leading to different rations of POI/non-POI in train and test subsets. In cases like this stratification can be used. K-fold cross-validation is a common approach used with stratification. Stratification is simply puts POIs and non-POIs into subsets with the ratio entire dataset has. However, in this project, we did not use stratification. Instead we used basic shuffle split.</p>
 <p>However in model building stage of this project we only used shuffle split with train and test subsets. We first fitted out classifiers with train dataset. Later on we evaluated our classifiers based on test data.</p>
 <p>However this type of evaluation is not deterministic enough. To get results better evaluating classifier n-fold validation is used. In this method, data is reshuffled n times and tested with split results for each fold. Overall results are then combined.</p>
 
